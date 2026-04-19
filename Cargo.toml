@@ -1,0 +1,13 @@
+[package]
+name = "dotup"
+version = "0.0.1"
+edition = "2024"
+rust-version = "1.85"
+description = "A declarative, symlink-based dotfiles manager for humans who think in tools, not files."
+readme = "README.md"
+repository = "https://github.com/ShortArrow/dotup"
+license = "MIT OR Apache-2.0"
+keywords = ["dotfiles", "symlink", "cli", "config"]
+categories = ["command-line-utilities", "config"]
+
+[dependencies]
