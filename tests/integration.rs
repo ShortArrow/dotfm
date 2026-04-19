@@ -21,7 +21,8 @@ fn help_lists_subcommands() {
         .stdout(predicate::str::contains("apply"))
         .stdout(predicate::str::contains("status"))
         .stdout(predicate::str::contains("list"))
-        .stdout(predicate::str::contains("doctor"));
+        .stdout(predicate::str::contains("doctor"))
+        .stdout(predicate::str::contains("diff"));
 }
 
 #[test]
@@ -31,7 +32,7 @@ fn version_is_printed() {
         .arg("--version")
         .assert()
         .success()
-        .stdout(predicate::str::contains("0.0.5"));
+        .stdout(predicate::str::contains("0.0.6"));
 }
 
 #[cfg(unix)]
@@ -233,13 +234,13 @@ run = ["sh", "-c", "touch {marker}"]
             .assert()
             .success()
             .stdout(predicate::str::contains("would run"));
-        assert!(
-            !marker.exists(),
-            "post_apply must not run under --dry-run"
-        );
+        assert!(!marker.exists(), "post_apply must not run under --dry-run");
 
         // real apply: hook runs
-        dotup(home.path(), &config_path).arg("apply").assert().success();
+        dotup(home.path(), &config_path)
+            .arg("apply")
+            .assert()
+            .success();
         assert!(marker.exists(), "post_apply did not create marker file");
     }
 
@@ -288,6 +289,99 @@ run = ["sh", "-c", "exit 3"]
         assert!(home.path().join(".config/a.txt").is_symlink());
     }
 
+    /// diff shows registry drift (available-but-disabled + orphan-enabled) and
+    /// link drift (missing vs ok) with the expected exit codes.
+    #[test]
+    fn diff_reports_each_layer() {
+        let (dotfiles, home) = fixture();
+        let config_path = home.path().join(".config/dotup/config.toml");
+
+        dotup(home.path(), &config_path)
+            .args(["init", "--dotfiles"])
+            .arg(dotfiles.path())
+            .assert()
+            .success();
+
+        // Before add: both tools are available-but-disabled → drift on layer 1,
+        // no link drift to report.
+        dotup(home.path(), &config_path)
+            .arg("diff")
+            .assert()
+            .failure()
+            .stdout(predicate::str::contains("available, not enabled"));
+
+        dotup(home.path(), &config_path)
+            .args(["add", "alacritty"])
+            .assert()
+            .success();
+
+        // After add but before apply: link drift.
+        dotup(home.path(), &config_path)
+            .arg("diff")
+            .assert()
+            .failure()
+            .stdout(predicate::str::contains("alacritty"));
+
+        dotup(home.path(), &config_path)
+            .arg("apply")
+            .assert()
+            .success();
+
+        // After apply: alacritty link is ok; starship still "available, not enabled".
+        // Overall exit is still non-zero because of layer 1 drift.
+        dotup(home.path(), &config_path)
+            .arg("diff")
+            .assert()
+            .failure()
+            .stdout(predicate::str::contains("all enabled links in sync"));
+    }
+
+    /// `--content` prints a unified diff for a destination that is a plain file
+    /// (not a symlink) and whose content differs from the source.
+    #[test]
+    fn diff_content_flag_shows_unified_diff() {
+        let dotfiles = TempDir::new().unwrap();
+        let home = TempDir::new().unwrap();
+        let config_path = home.path().join(".config/dotup/config.toml");
+
+        let src = dotfiles.path().join("t/file.txt");
+        fs::create_dir_all(src.parent().unwrap()).unwrap();
+        fs::write(&src, "hello\nworld\n").unwrap();
+
+        let dst = home.path().join(".config/t.txt");
+        fs::create_dir_all(dst.parent().unwrap()).unwrap();
+        fs::write(&dst, "hello\nthere\n").unwrap();
+
+        let registry = format!(
+            r#"
+[tools.t]
+[[tools.t.links]]
+src = "t/file.txt"
+dst.linux   = "{home}/.config/t.txt"
+dst.windows = "$APPDATA/t.txt"
+"#,
+            home = home.path().display()
+        );
+        fs::write(dotfiles.path().join("dotup.toml"), registry).unwrap();
+
+        dotup(home.path(), &config_path)
+            .args(["init", "--dotfiles"])
+            .arg(dotfiles.path())
+            .assert()
+            .success();
+        dotup(home.path(), &config_path)
+            .args(["add", "t"])
+            .assert()
+            .success();
+
+        dotup(home.path(), &config_path)
+            .args(["diff", "--content"])
+            .assert()
+            .failure()
+            .stdout(predicate::str::contains("-world"))
+            .stdout(predicate::str::contains("+there"));
+    }
+
     /// `os = ["linux"]` filter on a hook is honored.
     #[test]
     fn post_apply_os_filter_is_respected() {
@@ -333,7 +427,10 @@ os = ["windows"]
             .args(["add", "o"])
             .assert()
             .success();
-        dotup(home.path(), &config_path).arg("apply").assert().success();
+        dotup(home.path(), &config_path)
+            .arg("apply")
+            .assert()
+            .success();
 
         // On unix-run tests Os::current() == Linux, so only the linux hook fires.
         assert!(marker_linux.exists());

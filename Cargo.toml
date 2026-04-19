@@ -1,6 +1,6 @@
 [package]
 name = "dotup"
-version = "0.0.5"
+version = "0.0.6"
 edition = "2024"
 rust-version = "1.85"
 description = "A declarative, symlink-based dotfiles manager for humans who think in tools, not files."
@@ -15,6 +15,7 @@ anyhow = "1"
 clap = { version = "4", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
 shellexpand = "3"
+similar = "2"
 thiserror = "1"
 toml = "0.8"
 toml_edit = "0.22"

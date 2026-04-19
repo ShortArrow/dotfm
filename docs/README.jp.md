@@ -2,7 +2,7 @@
 
 > 「ファイル」ではなく「ツール」で考える人のための、宣言的でシンボリックリンクベースの dotfiles マネージャ。
 
-**バージョン:** 0.0.5（pre-alpha）。
+**バージョン:** 0.0.6（pre-alpha）。
 
 ---
 
@@ -69,6 +69,7 @@ dotup apply
 | `dotup status` | 有効ツールの一覧と、各 symlink が同期しているかを表示する。 |
 | `dotup list` | dotfiles リポの `dotup.toml` に定義された全ツールを表示する。 |
 | `dotup doctor [tool...]` | 環境チェックを実行（常時）。ツール固有の doctor スクリプトは、ツール名を指定するか `--all` を付けたときのみ走る。 |
+| `dotup diff [tool...]` | 3 レイヤーで差分を表示：レジストリ vs enabled、期待する symlink vs 実際の状態、（`--content` 付与時）衝突ファイルの unified diff。 |
 
 すべてのコマンドで `--dry-run` と `--verbose` をサポート。
 
@@ -145,7 +146,8 @@ enabled = [
 - **0.0.3** — `doctor` コマンド（汎用環境チェック + ツール固有 doctor スクリプトの委譲）。
 - **0.0.4** — ポリモーフィック `src`：単一パスは文字列、複数ファイル展開は `{ dir, include = [...] }`。
 - **0.0.5** — `doctor` のデフォルトを generic チェックのみに変更。ツールスクリプトは引数指定または `--all` でopt-in。
-- **0.0.6** — post-apply フック（例：`git config`）、エッジケース用に既存 `setup.sh` / `setup.ps1` への委譲。
+- **0.0.6** — `diff` コマンド（レジストリ / link / 内容の3レイヤー差分、`similar` crate 使用）。
+- **0.0.7** — post-apply フック（例：`git config`）、エッジケース用に既存 `setup.sh` / `setup.ps1` への委譲。
 - **0.1.0** — TOML スキーマ確定、ビルド済みバイナリ、エラーコード文書化。
 - **将来** — `diff`、`doctor`、`watch` モードなど。
 

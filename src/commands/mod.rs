@@ -7,6 +7,7 @@ use crate::style::Icons;
 
 pub mod add;
 pub mod apply;
+pub mod diff;
 pub mod doctor;
 pub mod init;
 pub mod list;
@@ -37,6 +38,9 @@ pub fn dispatch(cli: Cli) -> Result<ExitCode> {
         }
         Cmd::Status => status::run(cli.dotfiles.as_deref(), icons),
         Cmd::List => list::run(cli.dotfiles.as_deref(), icons),
+        Cmd::Diff { ref tools, content } => {
+            diff::run(cli.dotfiles.as_deref(), tools, content, icons)
+        }
         Cmd::Doctor {
             ref tools,
             all,

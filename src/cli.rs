@@ -70,6 +70,17 @@ pub enum Cmd {
     /// List all tools declared in dotup.toml.
     List,
 
+    /// Show what `apply` would change: registry drift, link drift, and file content drift.
+    Diff {
+        /// Limit to these tools (default: all enabled).
+        tools: Vec<String>,
+
+        /// Show unified diff when a destination is a regular file that differs from its src.
+        /// Skips binary files.
+        #[arg(long)]
+        content: bool,
+    },
+
     /// Run health checks: symlink drift, Windows Developer Mode, and
     /// per-tool doctor scripts declared in dotup.toml.
     ///

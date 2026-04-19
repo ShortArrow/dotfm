@@ -2,7 +2,7 @@
 
 > A declarative, symlink-based dotfiles manager for humans who think in **tools**, not files.
 
-**Version:** 0.0.5 (pre-alpha).
+**Version:** 0.0.6 (pre-alpha).
 
 ---
 
@@ -69,6 +69,7 @@ dotup apply
 | `dotup status` | Show which tools are enabled and whether their symlinks are in sync. |
 | `dotup list` | List all tools defined in the dotfiles repo's `dotup.toml`. |
 | `dotup doctor [tool...]` | Run environment checks (always). Tool-specific `doctor` scripts only run when a tool is named or `--all` is passed. |
+| `dotup diff [tool...]` | Show drift in three layers: registry vs enabled, expected vs actual symlinks, and (with `--content`) unified diffs for conflicting files. |
 
 Every command supports `--dry-run` and `--verbose`.
 
@@ -145,7 +146,8 @@ Different machines check out the same dotfiles repo but maintain independent ena
 - **0.0.3** — `doctor` command (generic env checks + per-tool doctor script delegation).
 - **0.0.4** — Polymorphic `src`: string for single path, `{ dir, include = [...] }` for multi-file expansion.
 - **0.0.5** — `doctor` default = generic checks only; tool scripts opt-in via arg or `--all`.
-- **0.0.6** — Post-apply hooks (e.g. `git config`), delegation to legacy `setup.sh` / `setup.ps1` scripts for edge cases.
+- **0.0.6** — `diff` command (registry / link / content drift, `similar` crate).
+- **0.0.7** — Post-apply hooks (e.g. `git config`), delegation to legacy `setup.sh` / `setup.ps1` scripts for edge cases.
 - **0.1.0** — Stable TOML schema, prebuilt binaries, documented error codes.
 - **future** — `diff`, `doctor`, maybe a `watch` mode.
 
