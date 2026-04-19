@@ -13,7 +13,6 @@ categories = ["command-line-utilities", "config"]
 [dependencies]
 anyhow = "1"
 clap = { version = "4", features = ["derive"] }
-directories = "5"
 serde = { version = "1", features = ["derive"] }
 shellexpand = "3"
 thiserror = "1"

@@ -1,10 +1,10 @@
 use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result};
-use directories::ProjectDirs;
 use toml_edit::{Array, DocumentMut, Item, Value, value};
 
 use crate::error::Error;
+use crate::os;
 
 /// In-memory representation of `~/.config/dotup/config.toml` with format preservation.
 #[derive(Debug)]
@@ -14,16 +14,16 @@ pub struct Config {
 }
 
 impl Config {
-    /// Default location: `<XDG_CONFIG_HOME>/dotup/config.toml`.
+    /// Default location: `$XDG_CONFIG_HOME/dotup/config.toml`,
+    /// falling back to `$HOME/.config/dotup/config.toml`
+    /// (or `$USERPROFILE/.config/dotup/config.toml` on Windows when `HOME` is unset).
     ///
     /// Can be overridden for testing with the `DOTUP_CONFIG` environment variable.
     pub fn default_path() -> Result<PathBuf> {
         if let Ok(p) = std::env::var("DOTUP_CONFIG") {
             return Ok(PathBuf::from(p));
         }
-        let dirs = ProjectDirs::from("", "", "dotup")
-            .ok_or_else(|| anyhow::anyhow!("cannot determine config directory"))?;
-        Ok(dirs.config_dir().join("config.toml"))
+        os::expand("$XDG_CONFIG_HOME/dotup/config.toml")
     }
 
     pub fn load(path: &Path) -> Result<Self> {
