@@ -36,19 +36,21 @@ pub fn run(
         };
 
         for link in &tool.links {
-            let Some(dst_raw) = link.dst.pick(current_os) else {
+            let resolved = link
+                .resolve(&root, current_os, os::expand)
+                .with_context(|| format!("resolving link for tool {t}"))?;
+            let Some(items) = resolved else {
                 continue;
             };
-            let dst =
-                os::expand(dst_raw).with_context(|| format!("expanding dst for tool {}", t))?;
-            let src = root.join(&link.src);
-            match link::remove_if_ours(&src, &dst, &root, dry_run)? {
-                Change::Removed => println!("  {}  {}", icons.removed, dst.display()),
-                Change::Skipped { reason } => {
-                    any_skipped = true;
-                    println!("  {}  {} ({reason})", icons.skipped, dst.display());
+            for item in items {
+                match link::remove_if_ours(&item.src, &item.dst, &root, dry_run)? {
+                    Change::Removed => println!("  {}  {}", icons.removed, item.dst.display()),
+                    Change::Skipped { reason } => {
+                        any_skipped = true;
+                        println!("  {}  {} ({reason})", icons.skipped, item.dst.display());
+                    }
+                    other => println!("  {other:?}  {}", item.dst.display()),
                 }
-                other => println!("  {other:?}  {}", dst.display()),
             }
         }
 

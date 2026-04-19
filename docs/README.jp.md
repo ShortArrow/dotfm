@@ -2,7 +2,7 @@
 
 > 「ファイル」ではなく「ツール」で考える人のための、宣言的でシンボリックリンクベースの dotfiles マネージャ。
 
-**バージョン:** 0.0.3（pre-alpha）。
+**バージョン:** 0.0.4（pre-alpha）。
 
 ---
 
@@ -93,12 +93,23 @@ dotup --icons plain list  # 強制的に ASCII
 dotfiles リポのルートに置く。すべてのツール、ソースパス、各 OS でのリンク先を宣言する。全マシンで共有。
 
 ```toml
+# 単一パス（ファイルまたはディレクトリ）。最も一般的なケース
 [tools.alacritty]
 description = "Alacritty terminal emulator config"
 [[tools.alacritty.links]]
 src = "alacritty"
 dst.windows = "$APPDATA/alacritty"
 dst.linux   = "$XDG_CONFIG_HOME/alacritty"
+
+# ソースディレクトリ配下の複数ファイルを、宛先ディレクトリに同名で個別symlink。
+# 宛先に「管理したくないファイル」が混ざる場合に使う（例：VS Code の
+# settings.json + keybindings.json は管理するが、生成物の snippets/ や
+# globalStorage/ は触らない）。
+[tools.code]
+[[tools.code.links]]
+src = { dir = "code", include = ["settings.json", "keybindings.json"] }
+dst.windows = "$APPDATA/Code/User"
+dst.linux   = "$XDG_CONFIG_HOME/Code/User"
 
 [tools.git]
 description = "Git global config"
@@ -132,7 +143,8 @@ enabled = [
 - **0.0.1** — `init`、`add`、`remove`、`apply`、`status`、`list`、`--dry-run`、`--force`。
 - **0.0.2** — `NERD_FONT` 環境変数 / `--icons` フラグによる Nerd Font アイコン対応。
 - **0.0.3** — `doctor` コマンド（汎用環境チェック + ツール固有 doctor スクリプトの委譲）。
-- **0.0.4** — post-apply フック（例：`git config`）、エッジケース用に既存 `setup.sh` / `setup.ps1` への委譲。
+- **0.0.4** — ポリモーフィック `src`：単一パスは文字列、複数ファイル展開は `{ dir, include = [...] }`。
+- **0.0.5** — post-apply フック（例：`git config`）、エッジケース用に既存 `setup.sh` / `setup.ps1` への委譲。
 - **0.1.0** — TOML スキーマ確定、ビルド済みバイナリ、エラーコード文書化。
 - **将来** — `diff`、`doctor`、`watch` モードなど。
 

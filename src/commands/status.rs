@@ -32,23 +32,26 @@ pub fn run(dotfiles_override: Option<&Path>, icons: Icons) -> Result<ExitCode> {
         };
         println!("{name}:");
         for link in &tool.links {
-            let Some(dst_raw) = link.dst.pick(current_os) else {
+            let resolved = link
+                .resolve(&root, current_os, os::expand)
+                .with_context(|| format!("resolving link for {name}"))?;
+            let Some(items) = resolved else {
                 continue;
             };
-            let dst = os::expand(dst_raw).with_context(|| format!("expanding dst for {name}"))?;
-            let src = root.join(&link.src);
-            let state = link::inspect(&src, &dst)
-                .with_context(|| format!("inspecting {}", dst.display()))?;
-            let (badge, is_bad) = match &state {
-                LinkState::CorrectLink => (icons.ok, false),
-                LinkState::Missing => (icons.missing, true),
-                LinkState::WrongLink { .. } => (icons.wrong, true),
-                LinkState::ExistingFile | LinkState::ExistingDir => (icons.conflict, true),
-            };
-            if is_bad {
-                any_bad = true;
+            for item in items {
+                let state = link::inspect(&item.src, &item.dst)
+                    .with_context(|| format!("inspecting {}", item.dst.display()))?;
+                let (badge, is_bad) = match &state {
+                    LinkState::CorrectLink => (icons.ok, false),
+                    LinkState::Missing => (icons.missing, true),
+                    LinkState::WrongLink { .. } => (icons.wrong, true),
+                    LinkState::ExistingFile | LinkState::ExistingDir => (icons.conflict, true),
+                };
+                if is_bad {
+                    any_bad = true;
+                }
+                println!("  {badge}  {}", item.dst.display());
             }
-            println!("  {badge}  {}", dst.display());
         }
     }
 

@@ -2,7 +2,7 @@
 
 > A declarative, symlink-based dotfiles manager for humans who think in **tools**, not files.
 
-**Version:** 0.0.3 (pre-alpha).
+**Version:** 0.0.4 (pre-alpha).
 
 ---
 
@@ -93,12 +93,23 @@ Two TOML files with clearly separated responsibilities:
 Lives at the root of your dotfiles repo. Declares every tool, its source paths, and where each should be symlinked on each OS. Shared across all machines.
 
 ```toml
+# Single path (file or directory) — most common
 [tools.alacritty]
 description = "Alacritty terminal emulator config"
 [[tools.alacritty.links]]
 src = "alacritty"
 dst.windows = "$APPDATA/alacritty"
 dst.linux   = "$XDG_CONFIG_HOME/alacritty"
+
+# Multiple files under a source directory, each linked into a destination
+# directory by the same filename. Use this when the destination also holds
+# files you don't want to manage (e.g. VS Code's settings + keybindings,
+# but not its generated `snippets/` or `globalStorage/`).
+[tools.code]
+[[tools.code.links]]
+src = { dir = "code", include = ["settings.json", "keybindings.json"] }
+dst.windows = "$APPDATA/Code/User"
+dst.linux   = "$XDG_CONFIG_HOME/Code/User"
 
 [tools.git]
 description = "Git global config"
@@ -132,7 +143,8 @@ Different machines check out the same dotfiles repo but maintain independent ena
 - **0.0.1** — `init`, `add`, `remove`, `apply`, `status`, `list`, `--dry-run`, `--force`.
 - **0.0.2** — Nerd Font icons via `NERD_FONT` env var and `--icons` flag.
 - **0.0.3** — `doctor` command (generic env checks + per-tool doctor script delegation).
-- **0.0.4** — Post-apply hooks (e.g. `git config`), delegation to legacy `setup.sh` / `setup.ps1` scripts for edge cases.
+- **0.0.4** — Polymorphic `src`: string for single path, `{ dir, include = [...] }` for multi-file expansion.
+- **0.0.5** — Post-apply hooks (e.g. `git config`), delegation to legacy `setup.sh` / `setup.ps1` scripts for edge cases.
 - **0.1.0** — Stable TOML schema, prebuilt binaries, documented error codes.
 - **future** — `diff`, `doctor`, maybe a `watch` mode.
 

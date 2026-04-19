@@ -82,25 +82,29 @@ fn apply_tool(
     icons: Icons,
 ) -> Result<()> {
     for link in &tool.links {
-        let Some(dst_raw) = link.dst.pick(current_os) else {
+        let resolved = link
+            .resolve(root, current_os, os::expand)
+            .with_context(|| format!("resolving link for {name}"))?;
+        let Some(items) = resolved else {
             continue;
         };
-        let dst = os::expand(dst_raw).with_context(|| format!("expanding dst for {name}"))?;
-        let src = root.join(&link.src);
-        if !src.exists() {
-            anyhow::bail!("src does not exist: {}", src.display());
+        for item in items {
+            if !item.src.exists() {
+                anyhow::bail!("src does not exist: {}", item.src.display());
+            }
+            let change = link::ensure(&item.src, &item.dst, force, dry_run).with_context(|| {
+                format!("link {} -> {}", item.dst.display(), item.src.display())
+            })?;
+            let badge = match change {
+                Change::Noop => icons.noop,
+                Change::Created => icons.link,
+                Change::Updated => icons.relink,
+                Change::BackedUpAndReplaced => icons.backup,
+                Change::Removed => icons.removed,
+                Change::Skipped { .. } => icons.skipped,
+            };
+            println!("  {badge}  {}", item.dst.display());
         }
-        let change = link::ensure(&src, &dst, force, dry_run)
-            .with_context(|| format!("link {} -> {}", dst.display(), src.display()))?;
-        let badge = match change {
-            Change::Noop => icons.noop,
-            Change::Created => icons.link,
-            Change::Updated => icons.relink,
-            Change::BackedUpAndReplaced => icons.backup,
-            Change::Removed => icons.removed,
-            Change::Skipped { .. } => icons.skipped,
-        };
-        println!("  {badge}  {}", dst.display());
     }
 
     // script delegation (run only if no explicit links)

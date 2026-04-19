@@ -142,37 +142,36 @@ fn check_enabled_links(
             continue;
         };
         for link in &tool.links {
-            let Some(dst_raw) = link.dst.pick(current_os) else {
-                continue;
-            };
-            let dst = match os::expand(dst_raw) {
-                Ok(p) => p,
+            let resolved = match link.resolve(root, current_os, os::expand) {
+                Ok(Some(items)) => items,
+                Ok(None) => continue,
                 Err(e) => {
-                    println!("  {}  {name}: expand {dst_raw}: {e}", icons.wrong);
+                    println!("  {}  {name}: {e:#}", icons.wrong);
                     ok = false;
                     continue;
                 }
             };
-            let src = root.join(&link.src);
-            match link::inspect(&src, &dst) {
-                Ok(LinkState::CorrectLink) => {}
-                Ok(state) => {
-                    let badge = match state {
-                        LinkState::Missing => icons.missing,
-                        LinkState::WrongLink { .. } => icons.wrong,
-                        LinkState::ExistingFile | LinkState::ExistingDir => icons.conflict,
-                        LinkState::CorrectLink => unreachable!(),
-                    };
-                    println!("  {badge}  {name}: {}", dst.display());
-                    ok = false;
-                }
-                Err(e) => {
-                    println!(
-                        "  {}  {name}: inspect {} failed: {e}",
-                        icons.wrong,
-                        dst.display()
-                    );
-                    ok = false;
+            for item in resolved {
+                match link::inspect(&item.src, &item.dst) {
+                    Ok(LinkState::CorrectLink) => {}
+                    Ok(state) => {
+                        let badge = match state {
+                            LinkState::Missing => icons.missing,
+                            LinkState::WrongLink { .. } => icons.wrong,
+                            LinkState::ExistingFile | LinkState::ExistingDir => icons.conflict,
+                            LinkState::CorrectLink => unreachable!(),
+                        };
+                        println!("  {badge}  {name}: {}", item.dst.display());
+                        ok = false;
+                    }
+                    Err(e) => {
+                        println!(
+                            "  {}  {name}: inspect {} failed: {e}",
+                            icons.wrong,
+                            item.dst.display()
+                        );
+                        ok = false;
+                    }
                 }
             }
         }
