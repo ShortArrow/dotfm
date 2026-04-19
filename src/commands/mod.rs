@@ -3,6 +3,7 @@ use std::process::ExitCode;
 use anyhow::Result;
 
 use crate::cli::{Cli, Cmd};
+use crate::style::Icons;
 
 pub mod add;
 pub mod apply;
@@ -13,6 +14,7 @@ pub mod status;
 pub mod util;
 
 pub fn dispatch(cli: Cli) -> Result<ExitCode> {
+    let icons = Icons::resolve(cli.icons);
     match cli.command {
         Cmd::Init { force } => init::run(cli.dotfiles.as_deref(), force),
         Cmd::Add {
@@ -24,12 +26,15 @@ pub fn dispatch(cli: Cli) -> Result<ExitCode> {
             run_apply,
             cli.dry_run,
             false,
+            icons,
         ),
-        Cmd::Remove { ref tools } => remove::run(cli.dotfiles.as_deref(), tools, cli.dry_run),
-        Cmd::Apply { ref tools, force } => {
-            apply::run(cli.dotfiles.as_deref(), tools, force, cli.dry_run)
+        Cmd::Remove { ref tools } => {
+            remove::run(cli.dotfiles.as_deref(), tools, cli.dry_run, icons)
         }
-        Cmd::Status => status::run(cli.dotfiles.as_deref()),
-        Cmd::List => list::run(cli.dotfiles.as_deref()),
+        Cmd::Apply { ref tools, force } => {
+            apply::run(cli.dotfiles.as_deref(), tools, force, cli.dry_run, icons)
+        }
+        Cmd::Status => status::run(cli.dotfiles.as_deref(), icons),
+        Cmd::List => list::run(cli.dotfiles.as_deref(), icons),
     }
 }

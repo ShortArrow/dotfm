@@ -7,8 +7,9 @@ use crate::config::Config;
 use crate::link::{self, LinkState};
 use crate::os::{self, Os};
 use crate::registry;
+use crate::style::Icons;
 
-pub fn run(dotfiles_override: Option<&Path>) -> Result<ExitCode> {
+pub fn run(dotfiles_override: Option<&Path>, icons: Icons) -> Result<ExitCode> {
     let cfg_path = Config::default_path()?;
     let cfg = Config::load(&cfg_path)?;
     let root = super::util::effective_root(&cfg, dotfiles_override)?;
@@ -39,16 +40,15 @@ pub fn run(dotfiles_override: Option<&Path>) -> Result<ExitCode> {
             let state = link::inspect(&src, &dst)
                 .with_context(|| format!("inspecting {}", dst.display()))?;
             let (badge, is_bad) = match &state {
-                LinkState::CorrectLink => ("ok     ", false),
-                LinkState::Missing => ("missing", true),
-                LinkState::WrongLink { .. } => ("wrong  ", true),
-                LinkState::ExistingFile => ("conflict(file)", true),
-                LinkState::ExistingDir => ("conflict(dir) ", true),
+                LinkState::CorrectLink => (icons.ok, false),
+                LinkState::Missing => (icons.missing, true),
+                LinkState::WrongLink { .. } => (icons.wrong, true),
+                LinkState::ExistingFile | LinkState::ExistingDir => (icons.conflict, true),
             };
             if is_bad {
                 any_bad = true;
             }
-            println!("  [{badge}] {}", dst.display());
+            println!("  {badge}  {}", dst.display());
         }
     }
 

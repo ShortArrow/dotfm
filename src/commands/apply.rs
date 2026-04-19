@@ -8,12 +8,14 @@ use crate::error::Error;
 use crate::link::{self, Change};
 use crate::os::{self, Os};
 use crate::registry::{self, Tool};
+use crate::style::Icons;
 
 pub fn run(
     dotfiles_override: Option<&Path>,
     tools_filter: &[String],
     force: bool,
     dry_run: bool,
+    icons: Icons,
 ) -> Result<ExitCode> {
     let cfg_path = Config::default_path()?;
     let cfg = Config::load(&cfg_path)?;
@@ -51,8 +53,8 @@ pub fn run(
             continue;
         }
 
-        println!("==> {name}");
-        let ok = apply_tool(name, tool, &root, current_os, force, dry_run)
+        println!("{} {name}", icons.tool_header);
+        let ok = apply_tool(name, tool, &root, current_os, force, dry_run, icons)
             .map_err(|e| {
                 eprintln!("  ! {name}: {e:#}");
             })
@@ -77,6 +79,7 @@ fn apply_tool(
     current_os: Os,
     force: bool,
     dry_run: bool,
+    icons: Icons,
 ) -> Result<()> {
     for link in &tool.links {
         let Some(dst_raw) = link.dst.pick(current_os) else {
@@ -89,15 +92,15 @@ fn apply_tool(
         }
         let change = link::ensure(&src, &dst, force, dry_run)
             .with_context(|| format!("link {} -> {}", dst.display(), src.display()))?;
-        match change {
-            Change::Noop => println!("  ok    {}", dst.display()),
-            Change::Created => println!("  link  {}", dst.display()),
-            Change::Updated => println!("  relink {}", dst.display()),
-            Change::BackedUpAndReplaced => {
-                println!("  backup+replace {}", dst.display());
-            }
-            other => println!("  {:?}  {}", other, dst.display()),
-        }
+        let badge = match change {
+            Change::Noop => icons.noop,
+            Change::Created => icons.link,
+            Change::Updated => icons.relink,
+            Change::BackedUpAndReplaced => icons.backup,
+            Change::Removed => icons.removed,
+            Change::Skipped { .. } => icons.skipped,
+        };
+        println!("  {badge}  {}", dst.display());
     }
 
     // script delegation (run only if no explicit links)

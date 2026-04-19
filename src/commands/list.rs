@@ -6,8 +6,9 @@ use anyhow::Result;
 use crate::config::Config;
 use crate::os::Os;
 use crate::registry;
+use crate::style::Icons;
 
-pub fn run(dotfiles_override: Option<&Path>) -> Result<ExitCode> {
+pub fn run(dotfiles_override: Option<&Path>, icons: Icons) -> Result<ExitCode> {
     let cfg = Config::default_path()
         .ok()
         .and_then(|p| Config::load(&p).ok());
@@ -32,7 +33,11 @@ pub fn run(dotfiles_override: Option<&Path>) -> Result<ExitCode> {
     let enabled: Vec<String> = cfg.as_ref().map(|c| c.enabled()).unwrap_or_default();
 
     for (name, tool) in &reg.tools {
-        let mark = if enabled.contains(name) { "*" } else { " " };
+        let mark = if enabled.contains(name) {
+            icons.enabled
+        } else {
+            icons.disabled
+        };
         let os_ok = tool.supports(current_os);
         let os_note = if os_ok { "" } else { " (not on this OS)" };
         let desc = tool.description.as_deref().unwrap_or("");

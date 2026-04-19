@@ -2,7 +2,7 @@
 
 > A declarative, symlink-based dotfiles manager for humans who think in **tools**, not files.
 
-**Version:** 0.0.1 (pre-alpha, design stage — no working binary yet).
+**Version:** 0.0.2 (pre-alpha).
 
 ---
 
@@ -71,6 +71,18 @@ dotup apply
 
 Every command supports `--dry-run` and `--verbose`.
 
+### Nerd Font icons
+
+`dotup` can use [Nerd Font](https://www.nerdfonts.com/) glyphs for status badges.
+There is no reliable way for a CLI to detect whether its terminal is rendering
+with a Nerd Font, so selection is opt-in:
+
+```sh
+export NERD_FONT=1        # enables Nerd glyphs when --icons=auto (default)
+dotup --icons nerd status # force glyphs regardless of env
+dotup --icons plain list  # force ASCII fallback
+```
+
 ## Configuration
 
 Two TOML files with clearly separated responsibilities:
@@ -116,9 +128,9 @@ Different machines check out the same dotfiles repo but maintain independent ena
 
 ## Roadmap
 
-- **0.0.1 (MVP)** — `init`, `add`, `remove`, `apply` for simple symlink tools. Windows + Linux.
-- **0.0.2** — `status`, `list`, `--dry-run`, post-apply hooks (e.g. `git config`).
-- **0.0.3** — Delegation to legacy `setup.sh` / `setup.ps1` scripts for edge cases.
+- **0.0.1** — `init`, `add`, `remove`, `apply`, `status`, `list`, `--dry-run`, `--force`.
+- **0.0.2** — Nerd Font icons via `NERD_FONT` env var and `--icons` flag.
+- **0.0.3** — Post-apply hooks (e.g. `git config`), delegation to legacy `setup.sh` / `setup.ps1` scripts for edge cases.
 - **0.1.0** — Stable TOML schema, prebuilt binaries, documented error codes.
 - **future** — `diff`, `doctor`, maybe a `watch` mode.
 

@@ -2,6 +2,8 @@ use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
 
+use crate::style::IconMode;
+
 #[derive(Debug, Parser)]
 #[command(name = "dotup", version, about)]
 pub struct Cli {
@@ -16,6 +18,10 @@ pub struct Cli {
     /// Override dotfiles root (otherwise taken from config.toml).
     #[arg(long, global = true, value_name = "PATH")]
     pub dotfiles: Option<PathBuf>,
+
+    /// Output icon set. `auto` honors the NERD_FONT environment variable.
+    #[arg(long, global = true, value_enum, default_value_t = IconMode::Auto)]
+    pub icons: IconMode,
 
     #[command(subcommand)]
     pub command: Cmd,

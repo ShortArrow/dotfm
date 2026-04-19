@@ -9,6 +9,7 @@ pub mod error;
 pub mod link;
 pub mod os;
 pub mod registry;
+pub mod style;
 
 pub fn run(cli: cli::Cli) -> ExitCode {
     init_tracing(cli.verbose);

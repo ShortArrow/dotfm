@@ -7,6 +7,7 @@ use crate::commands::apply;
 use crate::config::Config;
 use crate::error::Error;
 use crate::registry;
+use crate::style::Icons;
 
 pub fn run(
     dotfiles_override: Option<&Path>,
@@ -14,6 +15,7 @@ pub fn run(
     then_apply: bool,
     dry_run: bool,
     force_on_apply: bool,
+    icons: Icons,
 ) -> Result<ExitCode> {
     let cfg_path = Config::default_path()?;
     let mut cfg = Config::load(&cfg_path)?;
@@ -52,7 +54,7 @@ pub fn run(
     }
 
     if then_apply {
-        return apply::run(dotfiles_override, tools, force_on_apply, dry_run);
+        return apply::run(dotfiles_override, tools, force_on_apply, dry_run, icons);
     }
 
     if !added.is_empty() {

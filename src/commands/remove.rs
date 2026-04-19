@@ -7,8 +7,14 @@ use crate::config::Config;
 use crate::link::{self, Change};
 use crate::os::{self, Os};
 use crate::registry;
+use crate::style::Icons;
 
-pub fn run(dotfiles_override: Option<&Path>, tools: &[String], dry_run: bool) -> Result<ExitCode> {
+pub fn run(
+    dotfiles_override: Option<&Path>,
+    tools: &[String],
+    dry_run: bool,
+    icons: Icons,
+) -> Result<ExitCode> {
     let cfg_path = Config::default_path()?;
     let mut cfg = Config::load(&cfg_path)?;
     let root = super::util::effective_root(&cfg, dotfiles_override)?;
@@ -37,12 +43,12 @@ pub fn run(dotfiles_override: Option<&Path>, tools: &[String], dry_run: bool) ->
                 os::expand(dst_raw).with_context(|| format!("expanding dst for tool {}", t))?;
             let src = root.join(&link.src);
             match link::remove_if_ours(&src, &dst, &root, dry_run)? {
-                Change::Removed => println!("removed {}", dst.display()),
+                Change::Removed => println!("  {}  {}", icons.removed, dst.display()),
                 Change::Skipped { reason } => {
                     any_skipped = true;
-                    println!("skip   {} ({})", dst.display(), reason);
+                    println!("  {}  {} ({reason})", icons.skipped, dst.display());
                 }
-                other => println!("{:?}  {}", other, dst.display()),
+                other => println!("  {other:?}  {}", dst.display()),
             }
         }
 

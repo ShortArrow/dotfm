@@ -2,7 +2,7 @@
 
 > 「ファイル」ではなく「ツール」で考える人のための、宣言的でシンボリックリンクベースの dotfiles マネージャ。
 
-**バージョン:** 0.0.1（pre-alpha、設計段階で動くバイナリはまだありません）。
+**バージョン:** 0.0.2（pre-alpha）。
 
 ---
 
@@ -71,6 +71,18 @@ dotup apply
 
 すべてのコマンドで `--dry-run` と `--verbose` をサポート。
 
+### Nerd Font アイコン
+
+[Nerd Font](https://www.nerdfonts.com/) のグリフをステータスバッジに使えます。
+CLI 側からターミナルが Nerd Font を使っているか確実に検出する手段は無いため、
+opt-in 方式：
+
+```sh
+export NERD_FONT=1        # --icons=auto（デフォルト）のときに Nerd グリフを有効化
+dotup --icons nerd status # 環境変数に関わらず強制的にグリフ
+dotup --icons plain list  # 強制的に ASCII
+```
+
 ## 設定ファイル
 
 役割を明確に分離した 2 つの TOML ファイル：
@@ -116,9 +128,9 @@ enabled = [
 
 ## ロードマップ
 
-- **0.0.1 (MVP)** — 単純な symlink ツールに対する `init`、`add`、`remove`、`apply`。Windows + Linux。
-- **0.0.2** — `status`、`list`、`--dry-run`、post-apply フック（例：`git config`）。
-- **0.0.3** — エッジケース用に既存 `setup.sh` / `setup.ps1` への委譲。
+- **0.0.1** — `init`、`add`、`remove`、`apply`、`status`、`list`、`--dry-run`、`--force`。
+- **0.0.2** — `NERD_FONT` 環境変数 / `--icons` フラグによる Nerd Font アイコン対応。
+- **0.0.3** — post-apply フック（例：`git config`）、エッジケース用に既存 `setup.sh` / `setup.ps1` への委譲。
 - **0.1.0** — TOML スキーマ確定、ビルド済みバイナリ、エラーコード文書化。
 - **将来** — `diff`、`doctor`、`watch` モードなど。
 
