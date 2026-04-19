@@ -188,4 +188,155 @@ dst.windows = "$APPDATA/starship.toml"
             .failure()
             .stderr(predicate::str::contains("unknown tool"));
     }
+
+    /// post_apply hooks fire on `apply` and skip under `--dry-run`.
+    #[test]
+    fn post_apply_hook_runs_and_respects_dry_run() {
+        let dotfiles = TempDir::new().unwrap();
+        let home = TempDir::new().unwrap();
+        let config_path = home.path().join(".config/dotup/config.toml");
+
+        let src = dotfiles.path().join("marker/marker.txt");
+        fs::create_dir_all(src.parent().unwrap()).unwrap();
+        fs::write(&src, "m").unwrap();
+        let marker = home.path().join("marker_touched");
+
+        let registry = format!(
+            r#"
+[tools.marker]
+[[tools.marker.links]]
+src = "marker/marker.txt"
+dst.linux   = "{home}/.config/marker.txt"
+dst.windows = "$APPDATA/marker.txt"
+
+[[tools.marker.post_apply]]
+run = ["sh", "-c", "touch {marker}"]
+"#,
+            home = home.path().display(),
+            marker = marker.display()
+        );
+        fs::write(dotfiles.path().join("dotup.toml"), registry).unwrap();
+
+        dotup(home.path(), &config_path)
+            .args(["init", "--dotfiles"])
+            .arg(dotfiles.path())
+            .assert()
+            .success();
+        dotup(home.path(), &config_path)
+            .args(["add", "marker"])
+            .assert()
+            .success();
+
+        // dry-run: shows the intent but does not touch the marker file
+        dotup(home.path(), &config_path)
+            .args(["--dry-run", "apply"])
+            .assert()
+            .success()
+            .stdout(predicate::str::contains("would run"));
+        assert!(
+            !marker.exists(),
+            "post_apply must not run under --dry-run"
+        );
+
+        // real apply: hook runs
+        dotup(home.path(), &config_path).arg("apply").assert().success();
+        assert!(marker.exists(), "post_apply did not create marker file");
+    }
+
+    /// A failing post_apply hook makes `apply` exit non-zero and stops that tool.
+    #[test]
+    fn failing_post_apply_hook_surfaces_error() {
+        let dotfiles = TempDir::new().unwrap();
+        let home = TempDir::new().unwrap();
+        let config_path = home.path().join(".config/dotup/config.toml");
+
+        let src = dotfiles.path().join("a/file.txt");
+        fs::create_dir_all(src.parent().unwrap()).unwrap();
+        fs::write(&src, "x").unwrap();
+
+        let registry = format!(
+            r#"
+[tools.a]
+[[tools.a.links]]
+src = "a/file.txt"
+dst.linux   = "{home}/.config/a.txt"
+dst.windows = "$APPDATA/a.txt"
+
+[[tools.a.post_apply]]
+run = ["sh", "-c", "exit 3"]
+"#,
+            home = home.path().display()
+        );
+        fs::write(dotfiles.path().join("dotup.toml"), registry).unwrap();
+
+        dotup(home.path(), &config_path)
+            .args(["init", "--dotfiles"])
+            .arg(dotfiles.path())
+            .assert()
+            .success();
+        dotup(home.path(), &config_path)
+            .args(["add", "a"])
+            .assert()
+            .success();
+
+        dotup(home.path(), &config_path)
+            .arg("apply")
+            .assert()
+            .failure()
+            .stderr(predicate::str::contains("hook failed"));
+        // The link itself should still be created — ensure the tool did progress.
+        assert!(home.path().join(".config/a.txt").is_symlink());
+    }
+
+    /// `os = ["linux"]` filter on a hook is honored.
+    #[test]
+    fn post_apply_os_filter_is_respected() {
+        let dotfiles = TempDir::new().unwrap();
+        let home = TempDir::new().unwrap();
+        let config_path = home.path().join(".config/dotup/config.toml");
+
+        let src = dotfiles.path().join("o/file.txt");
+        fs::create_dir_all(src.parent().unwrap()).unwrap();
+        fs::write(&src, "x").unwrap();
+
+        let marker_linux = home.path().join("linux_touched");
+        let marker_win = home.path().join("windows_touched");
+
+        let registry = format!(
+            r#"
+[tools.o]
+[[tools.o.links]]
+src = "o/file.txt"
+dst.linux   = "{home}/.config/o.txt"
+dst.windows = "$APPDATA/o.txt"
+
+[[tools.o.post_apply]]
+run = ["sh", "-c", "touch {linux_marker}"]
+os = ["linux"]
+
+[[tools.o.post_apply]]
+run = ["sh", "-c", "touch {win_marker}"]
+os = ["windows"]
+"#,
+            home = home.path().display(),
+            linux_marker = marker_linux.display(),
+            win_marker = marker_win.display()
+        );
+        fs::write(dotfiles.path().join("dotup.toml"), registry).unwrap();
+
+        dotup(home.path(), &config_path)
+            .args(["init", "--dotfiles"])
+            .arg(dotfiles.path())
+            .assert()
+            .success();
+        dotup(home.path(), &config_path)
+            .args(["add", "o"])
+            .assert()
+            .success();
+        dotup(home.path(), &config_path).arg("apply").assert().success();
+
+        // On unix-run tests Os::current() == Linux, so only the linux hook fires.
+        assert!(marker_linux.exists());
+        assert!(!marker_win.exists());
+    }
 }
