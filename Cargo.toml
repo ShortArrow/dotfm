@@ -11,3 +11,18 @@ keywords = ["dotfiles", "symlink", "cli", "config"]
 categories = ["command-line-utilities", "config"]
 
 [dependencies]
+anyhow = "1"
+clap = { version = "4", features = ["derive"] }
+directories = "5"
+serde = { version = "1", features = ["derive"] }
+shellexpand = "3"
+thiserror = "1"
+toml = "0.8"
+toml_edit = "0.22"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+[dev-dependencies]
+assert_cmd = "2"
+predicates = "3"
+tempfile = "3"
