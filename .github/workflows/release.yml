@@ -44,7 +44,7 @@ jobs:
           # pipeline needs a custom NDK setup; Termux users can instead
           # `pkg install rust && cargo install dotfm` from source.
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ inputs.tag || github.ref }}
 
@@ -76,7 +76,7 @@ jobs:
           ls -la
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: dotfm-${{ matrix.target }}
           path: dist/*.${{ matrix.archive }}
@@ -88,7 +88,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           path: dist
           merge-multiple: true
