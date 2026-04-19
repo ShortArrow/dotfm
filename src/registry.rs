@@ -27,6 +27,10 @@ pub struct Tool {
     pub script: Option<OsMap<String>>,
     #[serde(default)]
     pub unscript: Option<OsMap<String>>,
+    /// Path to a tool-specific doctor script (relative to dotfiles_root),
+    /// invoked by `dotup doctor`. Windows scripts run under pwsh, Linux under bash.
+    #[serde(default)]
+    pub doctor: Option<OsMap<String>>,
 }
 
 #[derive(Debug, Deserialize)]

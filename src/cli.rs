@@ -69,4 +69,15 @@ pub enum Cmd {
 
     /// List all tools declared in dotup.toml.
     List,
+
+    /// Run health checks: symlink drift, Windows Developer Mode, and
+    /// per-tool doctor scripts declared in dotup.toml.
+    Doctor {
+        /// Run only the listed tools' doctors (default: all enabled tools).
+        tools: Vec<String>,
+
+        /// Skip the generic environment checks (only tool-specific doctors).
+        #[arg(long)]
+        no_generic: bool,
+    },
 }

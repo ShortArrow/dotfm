@@ -2,7 +2,7 @@
 
 > A declarative, symlink-based dotfiles manager for humans who think in **tools**, not files.
 
-**Version:** 0.0.2 (pre-alpha).
+**Version:** 0.0.3 (pre-alpha).
 
 ---
 
@@ -68,6 +68,7 @@ dotup apply
 | `dotup apply [tool...]` | Create/update symlinks for enabled tools. Idempotent. |
 | `dotup status` | Show which tools are enabled and whether their symlinks are in sync. |
 | `dotup list` | List all tools defined in the dotfiles repo's `dotup.toml`. |
+| `dotup doctor [tool...]` | Run environment checks plus any tool-specific `doctor` script declared in `dotup.toml`. |
 
 Every command supports `--dry-run` and `--verbose`.
 
@@ -130,7 +131,8 @@ Different machines check out the same dotfiles repo but maintain independent ena
 
 - **0.0.1** — `init`, `add`, `remove`, `apply`, `status`, `list`, `--dry-run`, `--force`.
 - **0.0.2** — Nerd Font icons via `NERD_FONT` env var and `--icons` flag.
-- **0.0.3** — Post-apply hooks (e.g. `git config`), delegation to legacy `setup.sh` / `setup.ps1` scripts for edge cases.
+- **0.0.3** — `doctor` command (generic env checks + per-tool doctor script delegation).
+- **0.0.4** — Post-apply hooks (e.g. `git config`), delegation to legacy `setup.sh` / `setup.ps1` scripts for edge cases.
 - **0.1.0** — Stable TOML schema, prebuilt binaries, documented error codes.
 - **future** — `diff`, `doctor`, maybe a `watch` mode.
 

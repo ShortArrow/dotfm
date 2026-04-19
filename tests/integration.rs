@@ -20,7 +20,8 @@ fn help_lists_subcommands() {
         .stdout(predicate::str::contains("remove"))
         .stdout(predicate::str::contains("apply"))
         .stdout(predicate::str::contains("status"))
-        .stdout(predicate::str::contains("list"));
+        .stdout(predicate::str::contains("list"))
+        .stdout(predicate::str::contains("doctor"));
 }
 
 #[test]
@@ -30,7 +31,7 @@ fn version_is_printed() {
         .arg("--version")
         .assert()
         .success()
-        .stdout(predicate::str::contains("0.0.2"));
+        .stdout(predicate::str::contains("0.0.3"));
 }
 
 #[cfg(unix)]

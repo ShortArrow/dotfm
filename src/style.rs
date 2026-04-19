@@ -93,38 +93,38 @@ fn nerd_fonts_enabled_in_env() -> bool {
 mod tests {
     use super::*;
 
+    // The NERD_FONT env var is process-global, so all checks that touch it
+    // live inside a single serialized test to avoid races with parallel runs.
     #[test]
-    fn auto_respects_nerd_font_env() {
-        // SAFETY: single-threaded test.
+    fn icon_resolution() {
+        // SAFETY: single-threaded test body.
+        let original = std::env::var("NERD_FONT").ok();
+
+        unsafe {
+            std::env::remove_var("NERD_FONT");
+        }
+        assert_eq!(Icons::resolve(IconMode::Auto).enabled, PLAIN.enabled);
+        assert_eq!(Icons::resolve(IconMode::Nerd).enabled, NERD.enabled);
+        assert_eq!(Icons::resolve(IconMode::Plain).enabled, PLAIN.enabled);
+
         unsafe {
             std::env::set_var("NERD_FONT", "1");
         }
-        let icons = Icons::resolve(IconMode::Auto);
-        assert_eq!(icons.enabled, NERD.enabled);
+        assert_eq!(Icons::resolve(IconMode::Auto).enabled, NERD.enabled);
+        // Explicit plain overrides the env var.
+        assert_eq!(Icons::resolve(IconMode::Plain).enabled, PLAIN.enabled);
+
         unsafe {
             std::env::set_var("NERD_FONT", "0");
         }
-        let icons = Icons::resolve(IconMode::Auto);
-        assert_eq!(icons.enabled, PLAIN.enabled);
-        unsafe {
-            std::env::remove_var("NERD_FONT");
-        }
-        let icons = Icons::resolve(IconMode::Auto);
-        assert_eq!(icons.enabled, PLAIN.enabled);
-    }
+        assert_eq!(Icons::resolve(IconMode::Auto).enabled, PLAIN.enabled);
 
-    #[test]
-    fn explicit_override_wins() {
+        // Restore original env state.
         unsafe {
-            std::env::remove_var("NERD_FONT");
-        }
-        assert_eq!(Icons::resolve(IconMode::Nerd).enabled, NERD.enabled);
-        unsafe {
-            std::env::set_var("NERD_FONT", "1");
-        }
-        assert_eq!(Icons::resolve(IconMode::Plain).enabled, PLAIN.enabled);
-        unsafe {
-            std::env::remove_var("NERD_FONT");
+            match original {
+                Some(v) => std::env::set_var("NERD_FONT", v),
+                None => std::env::remove_var("NERD_FONT"),
+            }
         }
     }
 }

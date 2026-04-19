@@ -2,7 +2,7 @@
 
 > 「ファイル」ではなく「ツール」で考える人のための、宣言的でシンボリックリンクベースの dotfiles マネージャ。
 
-**バージョン:** 0.0.2（pre-alpha）。
+**バージョン:** 0.0.3（pre-alpha）。
 
 ---
 
@@ -68,6 +68,7 @@ dotup apply
 | `dotup apply [tool...]` | 有効ツールの symlink を作成/更新する。冪等。 |
 | `dotup status` | 有効ツールの一覧と、各 symlink が同期しているかを表示する。 |
 | `dotup list` | dotfiles リポの `dotup.toml` に定義された全ツールを表示する。 |
+| `dotup doctor [tool...]` | 環境チェックと、`dotup.toml` に登録された各ツールの doctor スクリプトを実行する。 |
 
 すべてのコマンドで `--dry-run` と `--verbose` をサポート。
 
@@ -130,7 +131,8 @@ enabled = [
 
 - **0.0.1** — `init`、`add`、`remove`、`apply`、`status`、`list`、`--dry-run`、`--force`。
 - **0.0.2** — `NERD_FONT` 環境変数 / `--icons` フラグによる Nerd Font アイコン対応。
-- **0.0.3** — post-apply フック（例：`git config`）、エッジケース用に既存 `setup.sh` / `setup.ps1` への委譲。
+- **0.0.3** — `doctor` コマンド（汎用環境チェック + ツール固有 doctor スクリプトの委譲）。
+- **0.0.4** — post-apply フック（例：`git config`）、エッジケース用に既存 `setup.sh` / `setup.ps1` への委譲。
 - **0.1.0** — TOML スキーマ確定、ビルド済みバイナリ、エラーコード文書化。
 - **将来** — `diff`、`doctor`、`watch` モードなど。
 
