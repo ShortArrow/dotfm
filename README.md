@@ -1,4 +1,4 @@
-# dotup
+# dotfm
 
 > A declarative, symlink-based dotfiles manager for humans who think in **tools**, not files.
 
@@ -6,7 +6,7 @@
 
 ---
 
-## Why dotup?
+## Why dotfm?
 
 Existing dotfiles managers each enforce their own mental model:
 
@@ -16,9 +16,9 @@ Existing dotfiles managers each enforce their own mental model:
 | [GNU Stow](https://www.gnu.org/software/stow/) | Package unit, symlinks | Yes | No | No |
 | [dotbot](https://github.com/anishathalye/dotbot) | YAML task list | Yes | Via split YAMLs | Yes |
 
-`dotup` is opinionated about three things the above compromise on:
+`dotfm` is opinionated about three things the above compromise on:
 
-1. **Tool unit, not file unit.** You `dotup add alacritty`, not `dotup add ~/.config/alacritty/alacritty.toml`. All files that belong to a tool move as one.
+1. **Tool unit, not file unit.** You `dotfm add alacritty`, not `dotfm add ~/.config/alacritty/alacritty.toml`. All files that belong to a tool move as one.
 2. **Symlinks are the default.** Edit files in your dotfiles repo and changes take effect immediately. No `apply` step needed just to propagate edits.
 3. **Per-host tool list is a first-class concept.** Each machine declares *which tools it uses* in a single TOML list. No templates, no conditionals — just `enabled = ["alacritty", "mise", "nvim"]`.
 
@@ -28,10 +28,10 @@ Existing dotfiles managers each enforce their own mental model:
 
 ```sh
 # From source
-cargo install --git https://github.com/<owner>/dotup
+cargo install --git https://github.com/<owner>/dotfm
 
 # From crates.io (planned)
-cargo install dotup
+cargo install dotfm
 
 # Prebuilt binaries (planned)
 # See GitHub Releases
@@ -40,56 +40,56 @@ cargo install dotup
 ## Quick start
 
 ```sh
-# 1. Clone your dotfiles repo (which contains a dotup.toml at its root)
+# 1. Clone your dotfiles repo (which contains a dotfm.toml at its root)
 git clone https://github.com/<you>/dotfiles ~/dotfiles
 
-# 2. Initialize dotup on this machine
-dotup init --dotfiles ~/dotfiles
+# 2. Initialize dotfm on this machine
+dotfm init --dotfiles ~/dotfiles
 
 # 3. Enable the tools you want on this machine
-dotup add alacritty mise nvim git
+dotfm add alacritty mise nvim git
 
 # 4. Create all the symlinks
-dotup apply
+dotfm apply
 
 # Later: check drift, remove a tool, etc.
-dotup status
-dotup remove nvim
-dotup apply
+dotfm status
+dotfm remove nvim
+dotfm apply
 ```
 
 ## Commands
 
 | Command | Description |
 |---|---|
-| `dotup init` | Create `~/.config/dotup/config.toml` and record the dotfiles repo path. |
-| `dotup add <tool>...` | Add tools to this machine's enabled list. |
-| `dotup remove <tool>...` | Remove tools: strip symlinks and remove from enabled list. |
-| `dotup apply [tool...]` | Create/update symlinks for enabled tools. Idempotent. |
-| `dotup status` | Show which tools are enabled and whether their symlinks are in sync. |
-| `dotup list` | List all tools defined in the dotfiles repo's `dotup.toml`. |
-| `dotup doctor [tool...]` | Run environment checks (always). Tool-specific `doctor` scripts only run when a tool is named or `--all` is passed. |
-| `dotup diff [tool...]` | Show drift in three layers: registry vs enabled, expected vs actual symlinks, and (with `--content`) unified diffs for conflicting files. |
+| `dotfm init` | Create `~/.config/dotfm/config.toml` and record the dotfiles repo path. |
+| `dotfm add <tool>...` | Add tools to this machine's enabled list. |
+| `dotfm remove <tool>...` | Remove tools: strip symlinks and remove from enabled list. |
+| `dotfm apply [tool...]` | Create/update symlinks for enabled tools. Idempotent. |
+| `dotfm status` | Show which tools are enabled and whether their symlinks are in sync. |
+| `dotfm list` | List all tools defined in the dotfiles repo's `dotfm.toml`. |
+| `dotfm doctor [tool...]` | Run environment checks (always). Tool-specific `doctor` scripts only run when a tool is named or `--all` is passed. |
+| `dotfm diff [tool...]` | Show drift in three layers: registry vs enabled, expected vs actual symlinks, and (with `--content`) unified diffs for conflicting files. |
 
 Every command supports `--dry-run` and `--verbose`.
 
 ### Nerd Font icons
 
-`dotup` can use [Nerd Font](https://www.nerdfonts.com/) glyphs for status badges.
+`dotfm` can use [Nerd Font](https://www.nerdfonts.com/) glyphs for status badges.
 There is no reliable way for a CLI to detect whether its terminal is rendering
 with a Nerd Font, so selection is opt-in:
 
 ```sh
 export NERD_FONT=1        # enables Nerd glyphs when --icons=auto (default)
-dotup --icons nerd status # force glyphs regardless of env
-dotup --icons plain list  # force ASCII fallback
+dotfm --icons nerd status # force glyphs regardless of env
+dotfm --icons plain list  # force ASCII fallback
 ```
 
 ## Configuration
 
 Two TOML files with clearly separated responsibilities:
 
-### `dotup.toml` — repository-wide tool registry
+### `dotfm.toml` — repository-wide tool registry
 
 Lives at the root of your dotfiles repo. Declares every tool, its source paths, and where each should be symlinked on each OS. Shared across all machines.
 
@@ -122,7 +122,7 @@ dst.linux   = "$HOME/.gitconfig"
 run = ["git", "config", "--global", "init.defaultBranch", "main"]
 ```
 
-### `~/.config/dotup/config.toml` — per-machine state
+### `~/.config/dotfm/config.toml` — per-machine state
 
 Lives outside the dotfiles repo. Records which dotfiles repo this machine uses and which tools are enabled here. Not shared.
 

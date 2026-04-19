@@ -2,16 +2,16 @@ use std::path::PathBuf;
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    #[error("config not found at {path}. run `dotup init` first")]
+    #[error("config not found at {path}. run `dotfm init` first")]
     ConfigMissing { path: PathBuf },
 
     #[error("config already exists at {path}. use --force to overwrite")]
     ConfigExists { path: PathBuf },
 
-    #[error("dotfiles root {path} does not contain dotup.toml")]
+    #[error("dotfiles root {path} does not contain dotfm.toml")]
     RegistryMissing { path: PathBuf },
 
-    #[error("could not determine dotfiles root. pass --dotfiles <path> or run `dotup init` first")]
+    #[error("could not determine dotfiles root. pass --dotfiles <path> or run `dotfm init` first")]
     DotfilesRootUnknown,
 
     #[error("unknown tool `{name}`. available: {available}")]
@@ -24,7 +24,7 @@ pub enum Error {
     UnsupportedOs { name: String },
 
     #[error(
-        "destination {path} exists and is not a symlink managed by dotup; use --force to back it up and replace"
+        "destination {path} exists and is not a symlink managed by dotfm; use --force to back it up and replace"
     )]
     DestinationOccupied { path: PathBuf },
 }

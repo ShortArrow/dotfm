@@ -1,4 +1,4 @@
-# dotup — Product Requirements Document
+# dotfm — Product Requirements Document
 
 **Status:** Draft (pre-implementation)
 **Target release:** 0.0.1 MVP
@@ -7,7 +7,7 @@
 
 ## 1. Overview
 
-`dotup` is a command-line tool that lets a user declare, per machine, which tools from a shared dotfiles repository are active on that machine, and materializes them as symbolic links. It replaces hand-written `setup.sh` / `setup.ps1` scripts scattered across a dotfiles repo with a single declarative TOML registry plus a small stateful CLI.
+`dotfm` is a command-line tool that lets a user declare, per machine, which tools from a shared dotfiles repository are active on that machine, and materializes them as symbolic links. It replaces hand-written `setup.sh` / `setup.ps1` scripts scattered across a dotfiles repo with a single declarative TOML registry plus a small stateful CLI.
 
 ## 2. Problem statement
 
@@ -24,11 +24,11 @@ Existing managers do not solve all of the above simultaneously:
 - **GNU Stow** is symlink-first but Unix-only, has no per-host tool list, and does not cross platforms.
 - **dotbot** is YAML-driven and cross-platform, but does not offer CLI-driven enable/disable of tools per machine; users split YAML files themselves.
 
-`dotup` targets the intersection these tools miss.
+`dotfm` targets the intersection these tools miss.
 
 ## 3. Goals
 
-- **One registry.** Replace scattered `setup.sh` / `setup.ps1` files with one `dotup.toml` registry.
+- **One registry.** Replace scattered `setup.sh` / `setup.ps1` files with one `dotfm.toml` registry.
 - **Per-machine tool list.** Different machines check out the same repo and maintain independent enabled sets.
 - **Symlinks by default.** Editing a file in the dotfiles repo takes effect immediately without running `apply`.
 - **Tool-unit mental model.** `add`, `remove`, `apply` operate on tools, not on individual files.
@@ -42,8 +42,8 @@ Existing managers do not solve all of the above simultaneously:
 - **No encryption / secret management.** No password-manager integration.
 - **No cloud sync.** No hosted state.
 - **No first-class macOS in 0.0.x.** It may work by accident as "linux", but is not validated.
-- **No management of unregistered files.** If it is not in `dotup.toml`, `dotup` does not touch it.
-- **No package management.** `dotup` configures; it does not install software.
+- **No management of unregistered files.** If it is not in `dotfm.toml`, `dotfm` does not touch it.
+- **No package management.** `dotfm` configures; it does not install software.
 
 ## 5. Target users
 
@@ -54,36 +54,36 @@ Existing managers do not solve all of the above simultaneously:
 
 ## 6. User stories
 
-- Setting up a new machine: run `git clone <dotfiles> && dotup init && dotup add <tools> && dotup apply` and have all config in place.
+- Setting up a new machine: run `git clone <dotfiles> && dotfm init && dotfm add <tools> && dotfm apply` and have all config in place.
 - On a minimal machine: enable only a subset of tools without editing shared repo files or branching.
-- Add a new tool by adding one entry to `dotup.toml` — no new shell script.
-- `dotup apply` is safe to run any number of times without producing duplicate entries, broken links, or surprise overwrites.
-- Stop using a tool on this machine: `dotup remove <tool>` strips the symlinks and updates the enabled list atomically.
-- Keep awkward legacy setup (e.g. tmux theme downloader) as a plain `setup.sh` and have `dotup apply` invoke it.
+- Add a new tool by adding one entry to `dotfm.toml` — no new shell script.
+- `dotfm apply` is safe to run any number of times without producing duplicate entries, broken links, or surprise overwrites.
+- Stop using a tool on this machine: `dotfm remove <tool>` strips the symlinks and updates the enabled list atomically.
+- Keep awkward legacy setup (e.g. tmux theme downloader) as a plain `setup.sh` and have `dotfm apply` invoke it.
 - On Windows, symlink-permission errors are surfaced clearly (Developer Mode or Admin required), not silently swallowed.
 
 ## 7. Functional requirements
 
-### 7.1 `dotup init`
+### 7.1 `dotfm init`
 
-- Creates `~/.config/dotup/config.toml` if absent. Fails politely if present (suggest `--force`).
-- Records `dotfiles_root` from `--dotfiles <path>` flag or from the current working directory if it looks like a dotfiles repo (contains `dotup.toml`).
+- Creates `~/.config/dotfm/config.toml` if absent. Fails politely if present (suggest `--force`).
+- Records `dotfiles_root` from `--dotfiles <path>` flag or from the current working directory if it looks like a dotfiles repo (contains `dotfm.toml`).
 - Writes a starter file with empty `enabled = []`.
 
-### 7.2 `dotup add <tool>...`
+### 7.2 `dotfm add <tool>...`
 
-- Validates each tool exists in `dotup.toml`. If unknown, exits non-zero and prints available tools.
+- Validates each tool exists in `dotfm.toml`. If unknown, exits non-zero and prints available tools.
 - Adds tools to `enabled` in `config.toml`, preserving TOML formatting and existing comments (uses `toml_edit`).
-- Does **not** apply automatically. Prints a hint: `run 'dotup apply' to create symlinks`.
+- Does **not** apply automatically. Prints a hint: `run 'dotfm apply' to create symlinks`.
 - An `--apply` flag runs `apply` immediately after.
 
-### 7.3 `dotup remove <tool>...`
+### 7.3 `dotfm remove <tool>...`
 
-- For each tool: finds its declared links in `dotup.toml`, removes each symlink if and only if it still points inside `dotfiles_root` (safety: never delete a link the user has retargeted).
+- For each tool: finds its declared links in `dotfm.toml`, removes each symlink if and only if it still points inside `dotfiles_root` (safety: never delete a link the user has retargeted).
 - Removes the tool from `enabled` in `config.toml`.
 - If a tool is listed as `script = ...` (legacy delegation) with no corresponding `unscript`, prints a warning that manual cleanup may be required but still updates `enabled`.
 
-### 7.4 `dotup apply [tool...]`
+### 7.4 `dotfm apply [tool...]`
 
 - Default: apply all tools in `enabled`.
 - Argument form: apply only the specified tools (each must appear in `enabled`).
@@ -96,16 +96,16 @@ Existing managers do not solve all of the above simultaneously:
 - Continues to the next tool on failure, accumulates results, exits non-zero if any tool failed.
 - Supports `--dry-run` and `--verbose`.
 
-### 7.5 `dotup status`
+### 7.5 `dotfm status`
 
 - Lists each enabled tool with a per-link state badge (`ok` / `missing` / `wrong` / `conflict`).
 - Exits zero only if all links are `ok`.
 
-### 7.6 `dotup list`
+### 7.6 `dotfm list`
 
-- Prints all tools from `dotup.toml` plus a marker for those in `enabled`.
+- Prints all tools from `dotfm.toml` plus a marker for those in `enabled`.
 
-### 7.7 `dotup.toml` schema (sketch)
+### 7.7 `dotfm.toml` schema (sketch)
 
 ```toml
 [tools.<name>]
@@ -137,11 +137,11 @@ enabled = ["tool1", "tool2"]
 
 ## 8. Non-functional requirements
 
-- **Idempotency.** Running `dotup apply` N times has the same effect as running it once.
+- **Idempotency.** Running `dotfm apply` N times has the same effect as running it once.
 - **Dry-run.** `--dry-run` never touches the filesystem; output is a plan.
 - **Safety.** `remove` only deletes links that point inside `dotfiles_root`; it never rm -rf's files owned by the user.
 - **Single binary.** Distributed as one Rust binary per target. No runtime dependencies beyond the OS itself.
-- **Startup time.** `dotup status` and `dotup list` under 100 ms on a warm cache with a registry of ~50 tools.
+- **Startup time.** `dotfm status` and `dotfm list` under 100 ms on a warm cache with a registry of ~50 tools.
 - **Error messages.** Every failure names the tool, the link (src/dst), and the cause. No bare `io::Error` at the CLI boundary.
 - **Windows symlink privilege.** If symlink creation fails because Developer Mode is not enabled and the process is not elevated, the error explains both options explicitly.
 - **Logging.** `--verbose` uses `tracing`; `RUST_LOG` is honored.
@@ -158,21 +158,21 @@ enabled = ["tool1", "tool2"]
 ## 10. Success metrics
 
 - The motivating `dotfiles` repo's `setup.sh` + `setup.ps1` count drops from **40 to under 10** (only true edge cases retained via delegation).
-- New tool onboarding requires **≤ 1 commit to dotup.toml** (no new shell script in the common case).
-- First-time machine setup: `git clone` → `dotup init` → `dotup add ...` → `dotup apply` completes under 30 seconds on a representative machine.
-- `dotup apply` exit code 0 on a freshly applied machine and again immediately after (proves idempotency in practice).
+- New tool onboarding requires **≤ 1 commit to dotfm.toml** (no new shell script in the common case).
+- First-time machine setup: `git clone` → `dotfm init` → `dotfm add ...` → `dotfm apply` completes under 30 seconds on a representative machine.
+- `dotfm apply` exit code 0 on a freshly applied machine and again immediately after (proves idempotency in practice).
 
 ## 11. Open questions
 
-- **Registry file name.** `dotup.toml` at repo root vs. `.dotup/registry.toml`. Current preference: root.
+- **Registry file name.** `dotfm.toml` at repo root vs. `.dotfm/registry.toml`. Current preference: root.
 - **`.bak` cleanup.** Should `remove` leave the `.bak` files created by a prior `--force` apply, or clean them? Current preference: leave them, document it.
 - **Hook timing.** Should `apply` auto-run `post_apply` hooks on every invocation, or only when something actually changed? Current preference: always (matches chezmoi's `run_onchange_` semantics if we later need the variant).
-- **`dotup add --all`.** Enable everything in the registry — useful shortcut or footgun?
+- **`dotfm add --all`.** Enable everything in the registry — useful shortcut or footgun?
 - ~~**License.** MIT vs. Apache-2.0 vs. dual.~~ Decided: dual MIT OR Apache-2.0 (Rust ecosystem convention).
 
 ## 12. Appendix: comparison matrix
 
-| Requirement | chezmoi | Stow | dotbot | dotup |
+| Requirement | chezmoi | Stow | dotbot | dotfm |
 |---|---|---|---|---|
 | Symlink by default | No | Yes | Yes | **Yes** |
 | No filename prefix rules | No (`dot_`, `private_`) | Yes | Yes | **Yes** |

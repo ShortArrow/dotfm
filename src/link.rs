@@ -173,7 +173,7 @@ fn create_symlink(src: &Path, dst: &Path) -> Result<()> {
         if raw == Some(1314) {
             anyhow::anyhow!(
                 "creating symlink {} -> {}: Windows requires Developer Mode or an elevated (Admin) shell to create symlinks. \
-                 Enable Developer Mode in Settings, or run dotup from an elevated PowerShell.",
+                 Enable Developer Mode in Settings, or run dotfm from an elevated PowerShell.",
                 dst.display(),
                 src.display()
             )

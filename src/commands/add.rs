@@ -58,7 +58,7 @@ pub fn run(
     }
 
     if !added.is_empty() {
-        println!("run `dotup apply` to create symlinks.");
+        println!("run `dotfm apply` to create symlinks.");
     }
     Ok(ExitCode::SUCCESS)
 }

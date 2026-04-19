@@ -1,4 +1,4 @@
-//! End-to-end tests for `dotup`.
+//! End-to-end tests for `dotfm`.
 //!
 //! Smoke tests (`help`, `version`) run on every platform.
 //! The full init→add→apply→remove flow runs only on Unix where symlink creation
@@ -10,7 +10,7 @@ use predicates::prelude::*;
 
 #[test]
 fn help_lists_subcommands() {
-    Command::cargo_bin("dotup")
+    Command::cargo_bin("dotfm")
         .unwrap()
         .arg("--help")
         .assert()
@@ -27,7 +27,7 @@ fn help_lists_subcommands() {
 
 #[test]
 fn version_is_printed() {
-    Command::cargo_bin("dotup")
+    Command::cargo_bin("dotfm")
         .unwrap()
         .arg("--version")
         .assert()
@@ -75,16 +75,16 @@ dst.windows = "$APPDATA/starship.toml"
 "#,
             home = home.path().display()
         );
-        fs::write(dotfiles.path().join("dotup.toml"), registry).unwrap();
+        fs::write(dotfiles.path().join("dotfm.toml"), registry).unwrap();
 
         (dotfiles, home)
     }
 
-    fn dotup(home: &Path, config: &Path) -> Command {
-        let mut c = Command::cargo_bin("dotup").unwrap();
+    fn dotfm(home: &Path, config: &Path) -> Command {
+        let mut c = Command::cargo_bin("dotfm").unwrap();
         c.env("HOME", home)
             .env("USERPROFILE", home)
-            .env("DOTUP_CONFIG", config)
+            .env("DOTFM_CONFIG", config)
             .env_remove("XDG_CONFIG_HOME");
         c
     }
@@ -92,10 +92,10 @@ dst.windows = "$APPDATA/starship.toml"
     #[test]
     fn init_add_apply_status_remove_flow() {
         let (dotfiles, home) = fixture();
-        let config_path = home.path().join(".config/dotup/config.toml");
+        let config_path = home.path().join(".config/dotfm/config.toml");
 
         // init
-        dotup(home.path(), &config_path)
+        dotfm(home.path(), &config_path)
             .args(["init", "--dotfiles"])
             .arg(dotfiles.path())
             .assert()
@@ -104,7 +104,7 @@ dst.windows = "$APPDATA/starship.toml"
         assert!(config_path.is_file());
 
         // list shows both tools.
-        dotup(home.path(), &config_path)
+        dotfm(home.path(), &config_path)
             .arg("list")
             .assert()
             .success()
@@ -112,13 +112,13 @@ dst.windows = "$APPDATA/starship.toml"
             .stdout(predicate::str::contains("starship"));
 
         // add
-        dotup(home.path(), &config_path)
+        dotfm(home.path(), &config_path)
             .args(["add", "alacritty", "starship"])
             .assert()
             .success();
 
         // apply
-        dotup(home.path(), &config_path)
+        dotfm(home.path(), &config_path)
             .arg("apply")
             .assert()
             .success();
@@ -126,21 +126,21 @@ dst.windows = "$APPDATA/starship.toml"
         assert!(home.path().join(".config/starship.toml").is_symlink());
 
         // apply again — idempotent.
-        dotup(home.path(), &config_path)
+        dotfm(home.path(), &config_path)
             .arg("apply")
             .assert()
             .success()
             .stdout(predicate::str::contains("ok"));
 
         // status should report ok.
-        dotup(home.path(), &config_path)
+        dotfm(home.path(), &config_path)
             .arg("status")
             .assert()
             .success()
             .stdout(predicate::str::contains("ok"));
 
         // remove one tool and its symlink should disappear.
-        dotup(home.path(), &config_path)
+        dotfm(home.path(), &config_path)
             .args(["remove", "starship"])
             .assert()
             .success();
@@ -152,15 +152,15 @@ dst.windows = "$APPDATA/starship.toml"
     #[test]
     fn dry_run_does_not_touch_filesystem() {
         let (dotfiles, home) = fixture();
-        let config_path = home.path().join(".config/dotup/config.toml");
+        let config_path = home.path().join(".config/dotfm/config.toml");
 
-        dotup(home.path(), &config_path)
+        dotfm(home.path(), &config_path)
             .args(["init", "--dotfiles"])
             .arg(dotfiles.path())
             .assert()
             .success();
 
-        dotup(home.path(), &config_path)
+        dotfm(home.path(), &config_path)
             .args(["--dry-run", "add", "alacritty"])
             .assert()
             .success();
@@ -175,15 +175,15 @@ dst.windows = "$APPDATA/starship.toml"
     #[test]
     fn add_unknown_tool_errors() {
         let (dotfiles, home) = fixture();
-        let config_path = home.path().join(".config/dotup/config.toml");
+        let config_path = home.path().join(".config/dotfm/config.toml");
 
-        dotup(home.path(), &config_path)
+        dotfm(home.path(), &config_path)
             .args(["init", "--dotfiles"])
             .arg(dotfiles.path())
             .assert()
             .success();
 
-        dotup(home.path(), &config_path)
+        dotfm(home.path(), &config_path)
             .args(["add", "nope"])
             .assert()
             .failure()
@@ -195,7 +195,7 @@ dst.windows = "$APPDATA/starship.toml"
     fn post_apply_hook_runs_and_respects_dry_run() {
         let dotfiles = TempDir::new().unwrap();
         let home = TempDir::new().unwrap();
-        let config_path = home.path().join(".config/dotup/config.toml");
+        let config_path = home.path().join(".config/dotfm/config.toml");
 
         let src = dotfiles.path().join("marker/marker.txt");
         fs::create_dir_all(src.parent().unwrap()).unwrap();
@@ -216,20 +216,20 @@ run = ["sh", "-c", "touch {marker}"]
             home = home.path().display(),
             marker = marker.display()
         );
-        fs::write(dotfiles.path().join("dotup.toml"), registry).unwrap();
+        fs::write(dotfiles.path().join("dotfm.toml"), registry).unwrap();
 
-        dotup(home.path(), &config_path)
+        dotfm(home.path(), &config_path)
             .args(["init", "--dotfiles"])
             .arg(dotfiles.path())
             .assert()
             .success();
-        dotup(home.path(), &config_path)
+        dotfm(home.path(), &config_path)
             .args(["add", "marker"])
             .assert()
             .success();
 
         // dry-run: shows the intent but does not touch the marker file
-        dotup(home.path(), &config_path)
+        dotfm(home.path(), &config_path)
             .args(["--dry-run", "apply"])
             .assert()
             .success()
@@ -237,7 +237,7 @@ run = ["sh", "-c", "touch {marker}"]
         assert!(!marker.exists(), "post_apply must not run under --dry-run");
 
         // real apply: hook runs
-        dotup(home.path(), &config_path)
+        dotfm(home.path(), &config_path)
             .arg("apply")
             .assert()
             .success();
@@ -249,7 +249,7 @@ run = ["sh", "-c", "touch {marker}"]
     fn failing_post_apply_hook_surfaces_error() {
         let dotfiles = TempDir::new().unwrap();
         let home = TempDir::new().unwrap();
-        let config_path = home.path().join(".config/dotup/config.toml");
+        let config_path = home.path().join(".config/dotfm/config.toml");
 
         let src = dotfiles.path().join("a/file.txt");
         fs::create_dir_all(src.parent().unwrap()).unwrap();
@@ -268,19 +268,19 @@ run = ["sh", "-c", "exit 3"]
 "#,
             home = home.path().display()
         );
-        fs::write(dotfiles.path().join("dotup.toml"), registry).unwrap();
+        fs::write(dotfiles.path().join("dotfm.toml"), registry).unwrap();
 
-        dotup(home.path(), &config_path)
+        dotfm(home.path(), &config_path)
             .args(["init", "--dotfiles"])
             .arg(dotfiles.path())
             .assert()
             .success();
-        dotup(home.path(), &config_path)
+        dotfm(home.path(), &config_path)
             .args(["add", "a"])
             .assert()
             .success();
 
-        dotup(home.path(), &config_path)
+        dotfm(home.path(), &config_path)
             .arg("apply")
             .assert()
             .failure()
@@ -294,9 +294,9 @@ run = ["sh", "-c", "exit 3"]
     #[test]
     fn diff_reports_each_layer() {
         let (dotfiles, home) = fixture();
-        let config_path = home.path().join(".config/dotup/config.toml");
+        let config_path = home.path().join(".config/dotfm/config.toml");
 
-        dotup(home.path(), &config_path)
+        dotfm(home.path(), &config_path)
             .args(["init", "--dotfiles"])
             .arg(dotfiles.path())
             .assert()
@@ -304,32 +304,32 @@ run = ["sh", "-c", "exit 3"]
 
         // Before add: both tools are available-but-disabled → drift on layer 1,
         // no link drift to report.
-        dotup(home.path(), &config_path)
+        dotfm(home.path(), &config_path)
             .arg("diff")
             .assert()
             .failure()
             .stdout(predicate::str::contains("available, not enabled"));
 
-        dotup(home.path(), &config_path)
+        dotfm(home.path(), &config_path)
             .args(["add", "alacritty"])
             .assert()
             .success();
 
         // After add but before apply: link drift.
-        dotup(home.path(), &config_path)
+        dotfm(home.path(), &config_path)
             .arg("diff")
             .assert()
             .failure()
             .stdout(predicate::str::contains("alacritty"));
 
-        dotup(home.path(), &config_path)
+        dotfm(home.path(), &config_path)
             .arg("apply")
             .assert()
             .success();
 
         // After apply: alacritty link is ok; starship still "available, not enabled".
         // Overall exit is still non-zero because of layer 1 drift.
-        dotup(home.path(), &config_path)
+        dotfm(home.path(), &config_path)
             .arg("diff")
             .assert()
             .failure()
@@ -342,7 +342,7 @@ run = ["sh", "-c", "exit 3"]
     fn diff_content_flag_shows_unified_diff() {
         let dotfiles = TempDir::new().unwrap();
         let home = TempDir::new().unwrap();
-        let config_path = home.path().join(".config/dotup/config.toml");
+        let config_path = home.path().join(".config/dotfm/config.toml");
 
         let src = dotfiles.path().join("t/file.txt");
         fs::create_dir_all(src.parent().unwrap()).unwrap();
@@ -362,19 +362,19 @@ dst.windows = "$APPDATA/t.txt"
 "#,
             home = home.path().display()
         );
-        fs::write(dotfiles.path().join("dotup.toml"), registry).unwrap();
+        fs::write(dotfiles.path().join("dotfm.toml"), registry).unwrap();
 
-        dotup(home.path(), &config_path)
+        dotfm(home.path(), &config_path)
             .args(["init", "--dotfiles"])
             .arg(dotfiles.path())
             .assert()
             .success();
-        dotup(home.path(), &config_path)
+        dotfm(home.path(), &config_path)
             .args(["add", "t"])
             .assert()
             .success();
 
-        dotup(home.path(), &config_path)
+        dotfm(home.path(), &config_path)
             .args(["diff", "--content"])
             .assert()
             .failure()
@@ -387,7 +387,7 @@ dst.windows = "$APPDATA/t.txt"
     fn post_apply_os_filter_is_respected() {
         let dotfiles = TempDir::new().unwrap();
         let home = TempDir::new().unwrap();
-        let config_path = home.path().join(".config/dotup/config.toml");
+        let config_path = home.path().join(".config/dotfm/config.toml");
 
         let src = dotfiles.path().join("o/file.txt");
         fs::create_dir_all(src.parent().unwrap()).unwrap();
@@ -416,18 +416,18 @@ os = ["windows"]
             linux_marker = marker_linux.display(),
             win_marker = marker_win.display()
         );
-        fs::write(dotfiles.path().join("dotup.toml"), registry).unwrap();
+        fs::write(dotfiles.path().join("dotfm.toml"), registry).unwrap();
 
-        dotup(home.path(), &config_path)
+        dotfm(home.path(), &config_path)
             .args(["init", "--dotfiles"])
             .arg(dotfiles.path())
             .assert()
             .success();
-        dotup(home.path(), &config_path)
+        dotfm(home.path(), &config_path)
             .args(["add", "o"])
             .assert()
             .success();
-        dotup(home.path(), &config_path)
+        dotfm(home.path(), &config_path)
             .arg("apply")
             .assert()
             .success();

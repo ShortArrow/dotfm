@@ -1,14 +1,22 @@
 [package]
-name = "dotup"
+name = "dotfm"
 version = "0.0.6"
 edition = "2024"
 rust-version = "1.85"
+authors = ["ShortArrow <bamboogeneral@shortarrow.jp>"]
 description = "A declarative, symlink-based dotfiles manager for humans who think in tools, not files."
 readme = "README.md"
-repository = "https://github.com/ShortArrow/dotup"
+homepage = "https://github.com/ShortArrow/dotfm"
+repository = "https://github.com/ShortArrow/dotfm"
+documentation = "https://docs.rs/dotfm"
 license = "MIT OR Apache-2.0"
 keywords = ["dotfiles", "symlink", "cli", "config"]
 categories = ["command-line-utilities", "config"]
+exclude = [
+  "/.github/",
+  "/docs/",
+  "/tests/fixtures/",
+]
 
 [dependencies]
 anyhow = "1"

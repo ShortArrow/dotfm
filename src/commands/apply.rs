@@ -36,7 +36,7 @@ pub fn run(
     };
 
     if targets.is_empty() {
-        println!("no tools enabled. use `dotup add <tool>` first.");
+        println!("no tools enabled. use `dotfm add <tool>` first.");
         return Ok(ExitCode::SUCCESS);
     }
 

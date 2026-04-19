@@ -7,7 +7,7 @@ use serde::Deserialize;
 use crate::error::Error;
 use crate::os::Os;
 
-/// Top-level `dotup.toml` schema.
+/// Top-level `dotfm.toml` schema.
 #[derive(Debug, Deserialize)]
 pub struct Registry {
     #[serde(default)]
@@ -28,7 +28,7 @@ pub struct Tool {
     #[serde(default)]
     pub unscript: Option<OsMap<String>>,
     /// Path to a tool-specific doctor script (relative to dotfiles_root),
-    /// invoked by `dotup doctor`. Windows scripts run under pwsh, Linux under bash.
+    /// invoked by `dotfm doctor`. Windows scripts run under pwsh, Linux under bash.
     #[serde(default)]
     pub doctor: Option<OsMap<String>>,
 }
@@ -151,9 +151,9 @@ impl LinkSpec {
     }
 }
 
-/// Load `<root>/dotup.toml`.
+/// Load `<root>/dotfm.toml`.
 pub fn load(dotfiles_root: &Path) -> Result<Registry> {
-    let path: PathBuf = dotfiles_root.join("dotup.toml");
+    let path: PathBuf = dotfiles_root.join("dotfm.toml");
     if !path.is_file() {
         return Err(Error::RegistryMissing {
             path: dotfiles_root.to_path_buf(),
@@ -176,7 +176,7 @@ mod tests {
     fn load_minimal_registry() {
         let dir = tempdir().unwrap();
         std::fs::write(
-            dir.path().join("dotup.toml"),
+            dir.path().join("dotfm.toml"),
             r#"
 [tools.alacritty]
 description = "terminal"
@@ -206,7 +206,7 @@ dst.linux = "$HOME/.config/alacritty"
     fn load_expand_src_form() {
         let dir = tempdir().unwrap();
         std::fs::write(
-            dir.path().join("dotup.toml"),
+            dir.path().join("dotfm.toml"),
             r#"
 [tools.code]
 [[tools.code.links]]
@@ -231,6 +231,6 @@ dst.linux = "$XDG_CONFIG_HOME/Code/User"
     fn load_registry_missing_errors() {
         let dir = tempdir().unwrap();
         let err = load(dir.path()).unwrap_err();
-        assert!(err.to_string().contains("does not contain dotup.toml"));
+        assert!(err.to_string().contains("does not contain dotfm.toml"));
     }
 }

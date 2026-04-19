@@ -24,7 +24,7 @@ pub fn run(cli: cli::Cli) -> ExitCode {
 }
 
 fn init_tracing(verbose: bool) {
-    let default = if verbose { "dotup=debug" } else { "dotup=warn" };
+    let default = if verbose { "dotfm=debug" } else { "dotfm=warn" };
     let filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new(default));
     let _ = tracing_subscriber::fmt()
         .with_env_filter(filter)

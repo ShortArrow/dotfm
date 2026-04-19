@@ -19,7 +19,7 @@ pub fn run(dotfiles_override: Option<&Path>, icons: Icons) -> Result<ExitCode> {
             .ok_or_else(|| anyhow::anyhow!("dotfiles_root not set in config.toml"))?,
         (None, None) => {
             let cwd = std::env::current_dir()?;
-            if cwd.join("dotup.toml").is_file() {
+            if cwd.join("dotfm.toml").is_file() {
                 cwd
             } else {
                 anyhow::bail!(

@@ -6,7 +6,7 @@ use toml_edit::{Array, DocumentMut, Item, Value, value};
 use crate::error::Error;
 use crate::os;
 
-/// In-memory representation of `~/.config/dotup/config.toml` with format preservation.
+/// In-memory representation of `~/.config/dotfm/config.toml` with format preservation.
 #[derive(Debug)]
 pub struct Config {
     pub path: PathBuf,
@@ -14,16 +14,16 @@ pub struct Config {
 }
 
 impl Config {
-    /// Default location: `$XDG_CONFIG_HOME/dotup/config.toml`,
-    /// falling back to `$HOME/.config/dotup/config.toml`
-    /// (or `$USERPROFILE/.config/dotup/config.toml` on Windows when `HOME` is unset).
+    /// Default location: `$XDG_CONFIG_HOME/dotfm/config.toml`,
+    /// falling back to `$HOME/.config/dotfm/config.toml`
+    /// (or `$USERPROFILE/.config/dotfm/config.toml` on Windows when `HOME` is unset).
     ///
-    /// Can be overridden for testing with the `DOTUP_CONFIG` environment variable.
+    /// Can be overridden for testing with the `DOTFM_CONFIG` environment variable.
     pub fn default_path() -> Result<PathBuf> {
-        if let Ok(p) = std::env::var("DOTUP_CONFIG") {
+        if let Ok(p) = std::env::var("DOTFM_CONFIG") {
             return Ok(PathBuf::from(p));
         }
-        os::expand("$XDG_CONFIG_HOME/dotup/config.toml")
+        os::expand("$XDG_CONFIG_HOME/dotfm/config.toml")
     }
 
     pub fn load(path: &Path) -> Result<Self> {

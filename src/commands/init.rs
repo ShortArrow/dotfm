@@ -13,11 +13,11 @@ pub fn run(dotfiles: Option<&Path>, force: bool) -> Result<ExitCode> {
     let _cfg = Config::create(&path, &root, force)?;
     println!("created {}", path.display());
     println!("  dotfiles_root = {}", root.display());
-    println!("run `dotup add <tool>...` then `dotup apply`.");
+    println!("run `dotfm add <tool>...` then `dotfm apply`.");
     Ok(ExitCode::SUCCESS)
 }
 
-/// Resolve the dotfiles root: explicit flag wins; otherwise cwd must contain dotup.toml.
+/// Resolve the dotfiles root: explicit flag wins; otherwise cwd must contain dotfm.toml.
 pub fn resolve_dotfiles_root(explicit: Option<&Path>) -> Result<PathBuf> {
     if let Some(p) = explicit {
         let abs = if p.is_absolute() {
@@ -30,7 +30,7 @@ pub fn resolve_dotfiles_root(explicit: Option<&Path>) -> Result<PathBuf> {
         return Ok(abs);
     }
     let cwd = std::env::current_dir().context("cwd")?;
-    if cwd.join("dotup.toml").is_file() {
+    if cwd.join("dotfm.toml").is_file() {
         return Ok(cwd);
     }
     Err(Error::DotfilesRootUnknown.into())

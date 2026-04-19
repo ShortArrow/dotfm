@@ -5,13 +5,13 @@ use clap::{Parser, Subcommand};
 use crate::style::IconMode;
 
 #[derive(Debug, Parser)]
-#[command(name = "dotup", version, about)]
+#[command(name = "dotfm", version, about)]
 pub struct Cli {
     /// Preview changes without touching the filesystem.
     #[arg(long, global = true)]
     pub dry_run: bool,
 
-    /// Verbose logging (equivalent to RUST_LOG=dotup=debug).
+    /// Verbose logging (equivalent to RUST_LOG=dotfm=debug).
     #[arg(short, long, global = true)]
     pub verbose: bool,
 
@@ -29,7 +29,7 @@ pub struct Cli {
 
 #[derive(Debug, Subcommand)]
 pub enum Cmd {
-    /// Create ~/.config/dotup/config.toml for this machine.
+    /// Create ~/.config/dotfm/config.toml for this machine.
     Init {
         /// Overwrite the existing config.
         #[arg(long)]
@@ -67,7 +67,7 @@ pub enum Cmd {
     /// Show which symlinks are in sync.
     Status,
 
-    /// List all tools declared in dotup.toml.
+    /// List all tools declared in dotfm.toml.
     List,
 
     /// Show what `apply` would change: registry drift, link drift, and file content drift.
@@ -82,7 +82,7 @@ pub enum Cmd {
     },
 
     /// Run health checks: symlink drift, Windows Developer Mode, and
-    /// per-tool doctor scripts declared in dotup.toml.
+    /// per-tool doctor scripts declared in dotfm.toml.
     ///
     /// With no arguments, only the fast generic checks run. Pass tool names
     /// to invoke those tools' doctor scripts, or `--all` to run every

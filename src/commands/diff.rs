@@ -1,8 +1,8 @@
-//! `dotup diff` — show what `apply` would change.
+//! `dotfm diff` — show what `apply` would change.
 //!
 //! Three layers, printed in order so the user can scan top-down:
 //!
-//! 1. **Registry drift** — tools registered in `dotup.toml` but not in
+//! 1. **Registry drift** — tools registered in `dotfm.toml` but not in
 //!    `enabled`, or in `enabled` but missing from the registry.
 //! 2. **Link drift** — per-link state for each enabled tool (missing /
 //!    wrong / conflict / ok).

@@ -41,9 +41,9 @@ pub fn run(
     }
 
     // Default behavior: no tool-specific doctors unless the user asks.
-    // - `dotup doctor`             → only generic checks
-    // - `dotup doctor <tool>...`   → those tools' doctors
-    // - `dotup doctor --all`       → every enabled tool's doctor
+    // - `dotfm doctor`             → only generic checks
+    // - `dotfm doctor <tool>...`   → those tools' doctors
+    // - `dotfm doctor --all`       → every enabled tool's doctor
     let targets: Vec<&String> = if !tools_filter.is_empty() {
         tools_filter.iter().collect()
     } else if run_all {

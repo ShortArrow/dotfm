@@ -1,4 +1,4 @@
-# dotup
+# dotfm
 
 > 「ファイル」ではなく「ツール」で考える人のための、宣言的でシンボリックリンクベースの dotfiles マネージャ。
 
@@ -6,7 +6,7 @@
 
 ---
 
-## なぜ dotup か
+## なぜ dotfm か
 
 既存の dotfiles マネージャはそれぞれ独自のメンタルモデルを強制してきます：
 
@@ -16,9 +16,9 @@
 | [GNU Stow](https://www.gnu.org/software/stow/) | パッケージ単位、symlink | はい | なし | いいえ |
 | [dotbot](https://github.com/anishathalye/dotbot) | YAML タスクリスト | はい | YAML を分ければ可 | はい |
 
-`dotup` は上記ツールが妥協しているポイントを 3 点押し切ります：
+`dotfm` は上記ツールが妥協しているポイントを 3 点押し切ります：
 
-1. **ツール単位で考える。ファイル単位ではない。** `dotup add alacritty` と書く。`dotup add ~/.config/alacritty/alacritty.toml` ではない。ツールに属する全ファイルが一括で動く。
+1. **ツール単位で考える。ファイル単位ではない。** `dotfm add alacritty` と書く。`dotfm add ~/.config/alacritty/alacritty.toml` ではない。ツールに属する全ファイルが一括で動く。
 2. **シンボリックリンクがデフォルト。** dotfiles リポジトリのファイルを直接編集すれば即反映される。編集を伝搬させるためだけの `apply` ステップは不要。
 3. **端末別ツールリストを第一級で扱う。** 各マシンが「どのツールを使うか」を TOML のリスト 1 つで宣言する。テンプレも条件分岐もなく、`enabled = ["alacritty", "mise", "nvim"]` と書くだけ。
 
@@ -28,10 +28,10 @@
 
 ```sh
 # ソースから
-cargo install --git https://github.com/<owner>/dotup
+cargo install --git https://github.com/<owner>/dotfm
 
 # crates.io から（予定）
-cargo install dotup
+cargo install dotfm
 
 # ビルド済みバイナリ（予定）
 # GitHub Releases を参照
@@ -40,36 +40,36 @@ cargo install dotup
 ## クイックスタート
 
 ```sh
-# 1. dotfiles リポ（ルートに dotup.toml がある）を clone
+# 1. dotfiles リポ（ルートに dotfm.toml がある）を clone
 git clone https://github.com/<you>/dotfiles ~/dotfiles
 
-# 2. このマシンで dotup を初期化
-dotup init --dotfiles ~/dotfiles
+# 2. このマシンで dotfm を初期化
+dotfm init --dotfiles ~/dotfiles
 
 # 3. このマシンで使いたいツールを追加
-dotup add alacritty mise nvim git
+dotfm add alacritty mise nvim git
 
 # 4. シンボリックリンクを全部作成
-dotup apply
+dotfm apply
 
 # あとで：ドリフト確認、ツール削除など
-dotup status
-dotup remove nvim
-dotup apply
+dotfm status
+dotfm remove nvim
+dotfm apply
 ```
 
 ## コマンド
 
 | コマンド | 説明 |
 |---|---|
-| `dotup init` | `~/.config/dotup/config.toml` を作成し、dotfiles リポのパスを記録する。 |
-| `dotup add <tool>...` | このマシンの enabled リストにツールを追加する。 |
-| `dotup remove <tool>...` | ツールを外す：symlink を撤去し、enabled リストから削除する。 |
-| `dotup apply [tool...]` | 有効ツールの symlink を作成/更新する。冪等。 |
-| `dotup status` | 有効ツールの一覧と、各 symlink が同期しているかを表示する。 |
-| `dotup list` | dotfiles リポの `dotup.toml` に定義された全ツールを表示する。 |
-| `dotup doctor [tool...]` | 環境チェックを実行（常時）。ツール固有の doctor スクリプトは、ツール名を指定するか `--all` を付けたときのみ走る。 |
-| `dotup diff [tool...]` | 3 レイヤーで差分を表示：レジストリ vs enabled、期待する symlink vs 実際の状態、（`--content` 付与時）衝突ファイルの unified diff。 |
+| `dotfm init` | `~/.config/dotfm/config.toml` を作成し、dotfiles リポのパスを記録する。 |
+| `dotfm add <tool>...` | このマシンの enabled リストにツールを追加する。 |
+| `dotfm remove <tool>...` | ツールを外す：symlink を撤去し、enabled リストから削除する。 |
+| `dotfm apply [tool...]` | 有効ツールの symlink を作成/更新する。冪等。 |
+| `dotfm status` | 有効ツールの一覧と、各 symlink が同期しているかを表示する。 |
+| `dotfm list` | dotfiles リポの `dotfm.toml` に定義された全ツールを表示する。 |
+| `dotfm doctor [tool...]` | 環境チェックを実行（常時）。ツール固有の doctor スクリプトは、ツール名を指定するか `--all` を付けたときのみ走る。 |
+| `dotfm diff [tool...]` | 3 レイヤーで差分を表示：レジストリ vs enabled、期待する symlink vs 実際の状態、（`--content` 付与時）衝突ファイルの unified diff。 |
 
 すべてのコマンドで `--dry-run` と `--verbose` をサポート。
 
@@ -81,15 +81,15 @@ opt-in 方式：
 
 ```sh
 export NERD_FONT=1        # --icons=auto（デフォルト）のときに Nerd グリフを有効化
-dotup --icons nerd status # 環境変数に関わらず強制的にグリフ
-dotup --icons plain list  # 強制的に ASCII
+dotfm --icons nerd status # 環境変数に関わらず強制的にグリフ
+dotfm --icons plain list  # 強制的に ASCII
 ```
 
 ## 設定ファイル
 
 役割を明確に分離した 2 つの TOML ファイル：
 
-### `dotup.toml` — リポジトリ全体のツールレジストリ
+### `dotfm.toml` — リポジトリ全体のツールレジストリ
 
 dotfiles リポのルートに置く。すべてのツール、ソースパス、各 OS でのリンク先を宣言する。全マシンで共有。
 
@@ -122,7 +122,7 @@ dst.linux   = "$HOME/.gitconfig"
 run = ["git", "config", "--global", "init.defaultBranch", "main"]
 ```
 
-### `~/.config/dotup/config.toml` — マシン単位の状態
+### `~/.config/dotfm/config.toml` — マシン単位の状態
 
 dotfiles リポの外に置く。このマシンがどの dotfiles リポを使うか、どのツールを有効化しているかを記録。共有しない。
 

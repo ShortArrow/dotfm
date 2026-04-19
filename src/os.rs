@@ -84,9 +84,9 @@ mod tests {
     #[test]
     fn expand_env_var() {
         unsafe {
-            std::env::set_var("DOTUP_TEST_VAR", "/tmp/x");
+            std::env::set_var("DOTFM_TEST_VAR", "/tmp/x");
         }
-        let p = expand("$DOTUP_TEST_VAR/y").unwrap();
+        let p = expand("$DOTFM_TEST_VAR/y").unwrap();
         assert_eq!(p, PathBuf::from("/tmp/x/y"));
     }
 
