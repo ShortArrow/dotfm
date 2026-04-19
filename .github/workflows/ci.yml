@@ -44,18 +44,7 @@ jobs:
       - run: cargo build --verbose
       - run: cargo test --verbose
 
-  # Cross-compile for Termux (aarch64-linux-android). Tests can't run on the
-  # runner because there's no Android execution environment, but we at least
-  # verify the code builds cleanly.
-  build-android:
-    name: build for aarch64-linux-android (Termux)
-    needs: lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-      - name: Install cross
-        run: cargo install cross --locked --version ^0.2
-      - name: Build
-        run: cross build --release --target aarch64-linux-android
+  # Termux (aarch64-linux-android) target is intentionally not pre-built here.
+  # cross-rs 0.2.x bundles an old NDK that fails to link libunwind, and the
+  # cost of maintaining a custom NDK pipeline outweighs the benefit — Termux
+  # users can `pkg install rust && cargo install dotfm` to build locally.

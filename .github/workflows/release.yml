@@ -28,28 +28,21 @@ jobs:
             os: ubuntu-latest
             archive: tar.gz
             bin: dotfm
-            use_cross: false
           - target: x86_64-pc-windows-msvc
             os: windows-latest
             archive: zip
             bin: dotfm.exe
-            use_cross: false
           - target: x86_64-apple-darwin
             os: macos-latest
             archive: tar.gz
             bin: dotfm
-            use_cross: false
           - target: aarch64-apple-darwin
             os: macos-latest
             archive: tar.gz
             bin: dotfm
-            use_cross: false
-          # Termux (Android) — cross-built from Linux runner.
-          - target: aarch64-linux-android
-            os: ubuntu-latest
-            archive: tar.gz
-            bin: dotfm
-            use_cross: true
+          # Note: Termux (aarch64-linux-android) is not pre-built. The cross
+          # pipeline needs a custom NDK setup; Termux users can instead
+          # `pkg install rust && cargo install dotfm` from source.
     steps:
       - uses: actions/checkout@v4
         with:
@@ -63,17 +56,8 @@ jobs:
         with:
           key: release-${{ matrix.target }}
 
-      - name: Install cross
-        if: matrix.use_cross
-        run: cargo install cross --locked --version ^0.2
-
-      - name: Build (cargo)
-        if: ${{ !matrix.use_cross }}
+      - name: Build
         run: cargo build --release --target ${{ matrix.target }}
-
-      - name: Build (cross)
-        if: matrix.use_cross
-        run: cross build --release --target ${{ matrix.target }}
 
       - name: Stage artifact
         shell: bash

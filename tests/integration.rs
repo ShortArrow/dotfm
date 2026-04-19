@@ -302,12 +302,12 @@ run = ["sh", "-c", "exit 3"]
             .assert()
             .success();
 
-        // Before add: both tools are available-but-disabled → drift on layer 1,
-        // no link drift to report.
+        // Before add: layer 1 shows available-but-disabled entries (informational,
+        // not drift), layer 2 has nothing to check. Exit 0.
         dotfm(home.path(), &config_path)
             .arg("diff")
             .assert()
-            .failure()
+            .success()
             .stdout(predicate::str::contains("available, not enabled"));
 
         dotfm(home.path(), &config_path)
@@ -315,7 +315,7 @@ run = ["sh", "-c", "exit 3"]
             .assert()
             .success();
 
-        // After add but before apply: link drift.
+        // After add but before apply: layer 2 reports a missing link → exit 1.
         dotfm(home.path(), &config_path)
             .arg("diff")
             .assert()
@@ -327,12 +327,12 @@ run = ["sh", "-c", "exit 3"]
             .assert()
             .success();
 
-        // After apply: alacritty link is ok; starship still "available, not enabled".
-        // Overall exit is still non-zero because of layer 1 drift.
+        // After apply: alacritty link is ok; starship is still "available, not
+        // enabled" (informational). No drift, exit 0.
         dotfm(home.path(), &config_path)
             .arg("diff")
             .assert()
-            .failure()
+            .success()
             .stdout(predicate::str::contains("all enabled links in sync"));
     }
 
