@@ -16,6 +16,7 @@ use crate::style::Icons;
 pub fn run(
     dotfiles_override: Option<&Path>,
     tools_filter: &[String],
+    run_all: bool,
     skip_generic: bool,
     icons: Icons,
 ) -> Result<ExitCode> {
@@ -39,10 +40,16 @@ pub fn run(
         }
     }
 
-    let targets: Vec<&String> = if tools_filter.is_empty() {
+    // Default behavior: no tool-specific doctors unless the user asks.
+    // - `dotup doctor`             → only generic checks
+    // - `dotup doctor <tool>...`   → those tools' doctors
+    // - `dotup doctor --all`       → every enabled tool's doctor
+    let targets: Vec<&String> = if !tools_filter.is_empty() {
+        tools_filter.iter().collect()
+    } else if run_all {
         enabled.iter().collect()
     } else {
-        tools_filter.iter().collect()
+        Vec::new()
     };
 
     for name in &targets {

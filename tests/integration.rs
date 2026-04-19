@@ -31,7 +31,7 @@ fn version_is_printed() {
         .arg("--version")
         .assert()
         .success()
-        .stdout(predicate::str::contains("0.0.4"));
+        .stdout(predicate::str::contains("0.0.5"));
 }
 
 #[cfg(unix)]

@@ -72,11 +72,19 @@ pub enum Cmd {
 
     /// Run health checks: symlink drift, Windows Developer Mode, and
     /// per-tool doctor scripts declared in dotup.toml.
+    ///
+    /// With no arguments, only the fast generic checks run. Pass tool names
+    /// to invoke those tools' doctor scripts, or `--all` to run every
+    /// enabled tool's doctor.
     Doctor {
-        /// Run only the listed tools' doctors (default: all enabled tools).
+        /// Run these tools' doctor scripts (in addition to generic checks).
         tools: Vec<String>,
 
-        /// Skip the generic environment checks (only tool-specific doctors).
+        /// Run every enabled tool's doctor script.
+        #[arg(long, conflicts_with = "tools")]
+        all: bool,
+
+        /// Skip the generic environment checks.
         #[arg(long)]
         no_generic: bool,
     },
