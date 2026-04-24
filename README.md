@@ -159,6 +159,7 @@ Out of scope (on purpose): templating, encryption, secret management, cloud sync
 
 ## Documentation
 
+- [Changelog](CHANGELOG.md)
 - [日本語 README](docs/README.jp.md)
 - [PRD (English)](docs/PRD.md)
 - [PRD (日本語)](docs/PRD.jp.md)

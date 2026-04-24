@@ -165,6 +165,7 @@ enabled = [
 
 ## ドキュメント
 
+- [Changelog](../CHANGELOG.md)
 - [英語 README](../README.md)
 - [PRD（英語）](PRD.md)
 - [PRD（日本語）](PRD.jp.md)
