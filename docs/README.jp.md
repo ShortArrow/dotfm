@@ -1,8 +1,14 @@
 # dotfm
 
+[![crates.io](https://img.shields.io/crates/v/dotfm.svg)](https://crates.io/crates/dotfm)
+[![CI](https://github.com/ShortArrow/dotfm/actions/workflows/ci.yml/badge.svg)](https://github.com/ShortArrow/dotfm/actions/workflows/ci.yml)
+[![License: MIT OR Apache-2.0](https://img.shields.io/crates/l/dotfm.svg)](#ライセンス)
+
 > 「ファイル」ではなく「ツール」で考える人のための、宣言的でシンボリックリンクベースの dotfiles マネージャ。
 
-**バージョン:** 0.0.6（pre-alpha）。
+> **⚠ Pre-alpha (0.0.x)。** TOML スキーマは予告なく変更される可能性があります。
+> エラーコードや出力フォーマットは未確定です。個人的な実験用途のみで、
+> 本番のプロビジョニングスクリプトに組み込むのはまだ避けてください。
 
 ---
 
@@ -24,17 +30,15 @@
 
 ## インストール
 
-**未公開。** リリース後は：
-
 ```sh
-# ソースから
-cargo install --git https://github.com/<owner>/dotfm
-
-# crates.io から（予定）
+# crates.io から
 cargo install dotfm
 
-# ビルド済みバイナリ（予定）
-# GitHub Releases を参照
+# ソースから (最新 main)
+cargo install --git https://github.com/ShortArrow/dotfm
+
+# ビルド済みバイナリ
+# https://github.com/ShortArrow/dotfm/releases
 ```
 
 ## クイックスタート

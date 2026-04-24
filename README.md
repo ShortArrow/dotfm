@@ -1,8 +1,14 @@
 # dotfm
 
+[![crates.io](https://img.shields.io/crates/v/dotfm.svg)](https://crates.io/crates/dotfm)
+[![CI](https://github.com/ShortArrow/dotfm/actions/workflows/ci.yml/badge.svg)](https://github.com/ShortArrow/dotfm/actions/workflows/ci.yml)
+[![License: MIT OR Apache-2.0](https://img.shields.io/crates/l/dotfm.svg)](#license)
+
 > A declarative, symlink-based dotfiles manager for humans who think in **tools**, not files.
 
-**Version:** 0.0.6 (pre-alpha).
+> **⚠ Pre-alpha (0.0.x).** The TOML schema may change without notice; error
+> codes and output format are not yet stable. Use for personal experiments
+> only; don't hard-wire it into production provisioning scripts yet.
 
 ---
 
@@ -24,17 +30,15 @@ Existing dotfiles managers each enforce their own mental model:
 
 ## Installation
 
-**Not yet published.** When released:
-
 ```sh
-# From source
-cargo install --git https://github.com/<owner>/dotfm
-
-# From crates.io (planned)
+# From crates.io
 cargo install dotfm
 
-# Prebuilt binaries (planned)
-# See GitHub Releases
+# From source (latest main)
+cargo install --git https://github.com/ShortArrow/dotfm
+
+# Prebuilt binaries
+# https://github.com/ShortArrow/dotfm/releases
 ```
 
 ## Quick start
